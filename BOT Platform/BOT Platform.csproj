@@ -73,6 +73,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandDetector.cs" />
     <Compile Include="Develop Functions\AnonChat.cs" />
     <Compile Include="Develop Functions\Delelop Libs\LongAr.cs" />
     <Compile Include="Develop Functions\PCcontrols.cs" />
