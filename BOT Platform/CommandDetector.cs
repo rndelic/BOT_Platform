@@ -2,7 +2,6 @@
  * Данный класс не доработан.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;

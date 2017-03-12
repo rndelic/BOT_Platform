@@ -230,10 +230,8 @@ namespace MyFunctions
 
         static void Serialize()
         { 
-            // In this case, use a file stream.
             FileStream fs = new FileStream(DATA_FILE, FileMode.Create);
 
-            // Construct a BinaryFormatter and use it to serialize the data to the stream.
             BinaryFormatter formatter = new BinaryFormatter();
             try
             {
