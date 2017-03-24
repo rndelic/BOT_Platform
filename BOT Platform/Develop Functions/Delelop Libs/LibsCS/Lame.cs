@@ -323,8 +323,8 @@ namespace Yeti.Lame
     /// <param name="dwBufferSize">Receives the minimun number of bytes that must have the output(result) buffer</param>
     /// <param name="phbeStream">Receives the stream handle on return</param>
     /// <returns>On success: BE_ERR_SUCCESSFUL</returns>
-    [DllImport("Lame_enc.dll")]
-    public static extern uint beInitStream(BE_CONFIG pbeConfig, ref uint dwSamples, ref uint dwBufferSize, ref uint phbeStream);
+    [DllImport("Lame_enc.dll", CallingConvention = CallingConvention.StdCall)]
+        public static extern uint beInitStream(BE_CONFIG pbeConfig, ref uint dwSamples, ref uint dwBufferSize, ref uint phbeStream);
     /// <summary>
     /// Encodes a chunk of samples. Please note that if you have set the output to 
     /// generate mono MP3 files you must feed beEncodeChunk() with mono samples
@@ -414,7 +414,7 @@ namespace Yeti.Lame
     /// at least of the minimum size returned by beInitStream().</param>
     /// <param name="pdwOutput">Returns number of bytes of encoded data written.</param>
     /// <returns>On success: BE_ERR_SUCCESSFUL</returns>
-    [DllImport("Lame_enc.dll")]
+    [DllImport("Lame_enc.dll", CallingConvention = CallingConvention.StdCall)]
     public static extern uint beDeinitStream(uint hbeStream, [In, Out] byte[] pOutput, ref uint pdwOutput);
     /// <summary>
     /// Last function to be called when finished encoding a stream. 

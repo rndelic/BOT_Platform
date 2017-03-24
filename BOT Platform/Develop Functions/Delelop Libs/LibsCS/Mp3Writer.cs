@@ -89,8 +89,8 @@ namespace Yeti.MMedia.Mp3
       }
       catch
       {
-        base.Close();
-        throw;
+                base.Close();
+                throw;
       }
     }
 

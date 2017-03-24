@@ -29,6 +29,8 @@ namespace MyFunctions
             CommandsList.TryAddCommand("произнеси", new MyComandStruct("Возвращает аудиозапись с озвученным текстом", Speech));
 
         }
+
+
         void Speech(Message message, params object[] p)
         {
          

@@ -80,7 +80,9 @@ namespace BOT_Platform
 
                 catch (Exception ex)
                 {
-                    Console.WriteLine("[ERROR][SYSTEM] " + ex.Message);
+                    Console.WriteLine("---------------------------------------------------------------------");
+                    Console.WriteLine("[ERROR] \""+ message.Body+"\"\n" + ex.Message);
+                    Console.WriteLine("---------------------------------------------------------------------");
                     SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
                                          "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.platformSett.BotName[0] + ", команды) " +
                                          "или повторите запрос позже.",
