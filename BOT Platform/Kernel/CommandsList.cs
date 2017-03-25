@@ -74,8 +74,7 @@ namespace BOT_Platform
             {
                 try
                 {
-                    if(message.UserId == 57562243) SendMessage(message, "Пидоролокатор обнаружил Ыгната. Ыгнат, пошёл нахуй, пёс!", message.ChatId != null);//71752376
-                    else commandList[command].Function(message, obj);
+                  commandList[command].Function(message, obj);
                 }
 
                 catch (Exception ex)

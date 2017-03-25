@@ -169,28 +169,7 @@ namespace BOT_Platform
         {
             for (int i = 0; i < messages.Messages.Count; i++)
             {
-                #region  УДАЛИТЬ ИЗ РЕЛИЗА
-                /*
-                if ((messages.Messages[i].UserId == 169756316 || messages.Messages[i].UserId == 121290303) && messages.Messages[i].ChatId != null)
-                {
-                    bool contains1 = false;
-                    foreach (Message m in lastMessages)
-                    {
-                        if (m.Date == messages.Messages[i].Date &&
-                           m.UserId == messages.Messages[i].UserId &&
-                           m.Body == messages.Messages[i].Body)
-                        {
-                            contains1 = true;
-                            break;
-                        }
-                    }
-                    if (contains1) continue;
-
-                    Functions.SendMessage(messages.Messages[i], "бот-переводчик: ко-ко-ко, куд-кудах", messages.Messages[i].ChatId != null);
-                    lastMessages.Add(messages.Messages[i]);
-                    continue;
-                }*/
-                #endregion
+               
 
                 string botName = FindBotNameInMessage(messages.Messages[i]);
 

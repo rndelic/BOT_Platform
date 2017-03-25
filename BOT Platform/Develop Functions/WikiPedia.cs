@@ -13,7 +13,7 @@ namespace MyFunctions
     {
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("вики", new MyComandStruct("Находит статью в википедии по запросу (beta)", FindWiki));
+            CommandsList.TryAddCommand("вики", new MyComandStruct("Находит статью в википедии по запросу", FindWiki));
         }
 
         private void FindWiki(Message message, object[] p)
@@ -39,7 +39,8 @@ namespace MyFunctions
 
             if (fnode == null)
             {
-                Functions.SendMessage(message, "Не удалось найти статью по заданной теме! Проверьте правильность написания запроса :(", message.ChatId != null);
+                Functions.SendMessage(message, "Не удалось найти статью по заданной теме! Проверьте правильность написания запроса :(\n\n" +
+                    "Обратите внимание, что имена собственные рекомендуется писать с заглавной буквы.", message.ChatId != null);
                 return;
             }
 
@@ -49,8 +50,8 @@ namespace MyFunctions
             String.Format("Before:{0}", ss);
             ss = regex.Replace(ss, string.Empty);
 
-            if (ss.Length > 4096) ss = ss.Substring(0, 4000);
-            ss += "\n\n Подробнее: " + "https://ru.wikipedia.org/wiki/" + request;
+            if (ss.Length > 4096) ss = ss.Substring(0, 4000) + "...";
+            ss += "\n\nПодробнее: " + "https://ru.wikipedia.org/wiki/" + request;
 
             Functions.SendMessage(message, ss, message.ChatId != null);
 
