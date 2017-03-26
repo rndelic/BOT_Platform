@@ -110,6 +110,7 @@
     <Compile Include="Develop Functions\Delelop Libs\LibsCS\Mp3Writer.cs" />
     <Compile Include="Develop Functions\Delelop Libs\LibsCS\Mp3WriterConfig.cs" />
     <Compile Include="Kernel\Program.cs" />
+    <Compile Include="Develop Functions\Mems.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Kernel\Settings.cs" />
     <Compile Include="Develop Functions\SpeechTheText.cs" />

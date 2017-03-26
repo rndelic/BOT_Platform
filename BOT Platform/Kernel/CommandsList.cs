@@ -91,7 +91,7 @@ namespace BOT_Platform
 
             else
             {
-               SendMessage(message, "Команда не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания, проверьте, что вы не Ыгнат,\n" +
+               SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
                                     "или воспользуйтесь командой " + BOT_API.platformSett.BotName[0] + ", команды.",
                                     message.ChatId != null);
             }
