@@ -8,5 +8,6 @@ Now BOT can:
 3) Engine voice text
 4) Calculate expressions with long fractional arithmetic (+, -, *, / only)
 5) Search entries in groups by keywords / suggestions
-6) Other funny, but less important things (:
+6) Added the ability to overlay text on image
+7) Other funny, but less important things (:
 
