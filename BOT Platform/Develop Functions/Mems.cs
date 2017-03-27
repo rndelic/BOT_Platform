@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -19,7 +21,7 @@ namespace MyFunctions
         const string IN_FILENAME = "in_mem.jpg";
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью", MakeMem, false));
+            CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
         }
 
         private void MakeMem(Message message, object[] p)
@@ -51,12 +53,12 @@ namespace MyFunctions
 
             Photo photo = ((message.Attachments[0].Instance) as Photo);
 
-                    if (photo.Photo2560 != null) webClient.DownloadFile(photo.Photo2560, IN_FILENAME);
+                    if      (photo.Photo2560 != null) webClient.DownloadFile(photo.Photo2560, IN_FILENAME);
                     else if (photo.Photo1280 != null) webClient.DownloadFile(photo.Photo1280, IN_FILENAME);
-                    else if (photo.Photo807 != null) webClient.DownloadFile(photo.Photo807, IN_FILENAME);
-                    else if (photo.Photo604 != null) webClient.DownloadFile(photo.Photo604, IN_FILENAME);
-                    else if (photo.Photo130 != null) webClient.DownloadFile(photo.Photo130, IN_FILENAME);
-                    else if (photo.Photo75 != null) webClient.DownloadFile(photo.Photo75, IN_FILENAME);
+                    else if (photo.Photo807  != null) webClient.DownloadFile(photo.Photo807,  IN_FILENAME);
+                    else if (photo.Photo604  != null) webClient.DownloadFile(photo.Photo604,  IN_FILENAME);
+                    else if (photo.Photo130  != null) webClient.DownloadFile(photo.Photo130,  IN_FILENAME);
+                    else if (photo.Photo75   != null) webClient.DownloadFile(photo.Photo75,   IN_FILENAME);
 
                     DrawAndSave(text);
                     photoList.Add(SavePhoto());
@@ -73,42 +75,104 @@ namespace MyFunctions
             Image image = Image.FromFile(IN_FILENAME);
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
             const string FONT_NAME = "Arial Black";
 
             for (int i = 0; i < text.Length; i++)
             {
                 text[i] = text[i].ToUpperInvariant();
+                Functions.RemoveSpaces(ref text[i]);
             }
 
             if (text.Length == 1)
             {
-                Functions.RemoveSpaces(ref text[0]);
+                using (Graphics g = Graphics.FromImage(image))
+                {
+                    //g.InterpolationMode = InterpolationMode.High;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                    //g.CompositingQuality = CompositingQuality.HighQuality;
 
-                Font font = new Font(FONT_NAME, (Math.Min(image.Width, image.Height)  / text[0].Length));
+                    FontFamily ff = new FontFamily(FONT_NAME);
+                    Font font = new Font(ff, (image.Width / text[0].Length), FontStyle.Regular);
+                    StringFormat sf = new StringFormat();
 
-                SizeF textSize = graphics.MeasureString(text[0], font);
+                    SizeF textSize = graphics.MeasureString(text[0], font);
+                    GraphicsPath gp = new GraphicsPath();
+                    gp.AddString(text[0], ff, (int)FontStyle.Regular, (image.Width / text[0].Length) + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
 
-                PointF point = new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height);
+                    GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
+                    // outline the path
+                    outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f));//6
 
-                graphics.DrawString(text[0], font, Brushes.White, point);
+                    g.FillPath(Brushes.Black, outlinePath);
+                    g.FillPath(Brushes.White, gp);
+
+                    //g.Flush(FlushIntention.Sync);
+                    image.Save(OUT_FILENAME);
+                    g.Dispose();
+                    gp.Dispose();
+                    outlinePath.Dispose();
+                }
             }
+
             else
             {
-                Functions.RemoveSpaces(ref text[0]);
-                Functions.RemoveSpaces(ref text[1]);
-                
-                Font font1 = new Font(FONT_NAME, Math.Min(image.Width, image.Height)  / text[0].Length);
-                Font font2 = new Font(FONT_NAME, Math.Min(image.Width, image.Height)  / text[1].Length);
+                using (Graphics g = Graphics.FromImage(image))
+                {
+                    //g.InterpolationMode = InterpolationMode.High;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                    //g.CompositingQuality = CompositingQuality.HighQuality;
 
-                SizeF textSize1 = graphics.MeasureString(text[0], font1);
-                SizeF textSize2 = graphics.MeasureString(text[1], font2);
+                    FontFamily ff = new FontFamily(FONT_NAME);
+                    Font font = new Font(ff, (image.Width / text[1].Length), FontStyle.Regular);
+                    StringFormat sf = new StringFormat();
 
-                PointF point1 = new PointF(( image.Width - textSize1.Width) / 2, image.Height * 0.04f);
-                PointF point2 = new PointF(( image.Width - textSize2.Width) / 2, image.Height - textSize2.Height);
+                    SizeF textSize = graphics.MeasureString(text[1], font);
+                    GraphicsPath gp = new GraphicsPath();
+                    gp.AddString(text[1], ff, (int)FontStyle.Regular, (image.Width / text[1].Length) + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
 
-                graphics.DrawString(text[0], font1, Brushes.White, point1);
-                graphics.DrawString(text[1], font2, Brushes.White, point2);
+                    GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
+                    // outline the path
+                    outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f));
+
+                    g.FillPath(Brushes.Black, outlinePath);
+                    g.FillPath(Brushes.White, gp);
+
+                    //g.Flush(FlushIntention.Sync);
+                    image.Save(OUT_FILENAME);
+                    g.Dispose();
+                    gp.Dispose();
+                    outlinePath.Dispose();
+                }
+                using (Graphics g = Graphics.FromImage(image))
+                {
+                    //g.InterpolationMode = InterpolationMode.High;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                    //g.CompositingQuality = CompositingQuality.HighQuality;
+
+                    FontFamily ff = new FontFamily(FONT_NAME);
+                    Font font = new Font(ff, (image.Width / text[0].Length), FontStyle.Regular);
+                    StringFormat sf = new StringFormat();
+
+                    SizeF textSize = graphics.MeasureString(text[0], font);
+                    GraphicsPath gp = new GraphicsPath();
+                    gp.AddString(text[0], ff, (int)FontStyle.Regular, (image.Width / text[0].Length) + 1, new PointF((image.Width - textSize.Width) / 2, 0), sf); //image.Height * 0.04f
+
+                    GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
+                    // outline the path
+                    outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f));
+
+                    g.FillPath(Brushes.Black, outlinePath);
+                    g.FillPath(Brushes.White, gp);
+
+                    //g.Flush(FlushIntention.Sync);
+                    image.Save(OUT_FILENAME);
+                    g.Dispose();
+                    gp.Dispose();
+                    outlinePath.Dispose();
+                }
             }
 
             graphics.Dispose();
@@ -133,6 +197,8 @@ namespace MyFunctions
 
             Functions.SendMessage(message, param, "", message.ChatId != null);
         }
+
+
         public Mems()
         {
             AddMyCommandInPlatform();
