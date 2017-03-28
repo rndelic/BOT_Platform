@@ -25,13 +25,13 @@ namespace BOT_Platform
             }
         }
 
-        public bool Hidden { get;  } 
+        public bool Hidden { get; }
 
         public MyComandStruct(string desc, CommandsList.Function func, bool isHidden = false)
         {
             this.Hidden = isHidden;
             this.description = desc;
-            this.MyFunction  = new CommandsList.Function(func);
+            this.MyFunction = new CommandsList.Function(func);
         }
     }
 
@@ -51,15 +51,55 @@ namespace BOT_Platform
         static SortedDictionary<string, MyComandStruct> consoleCommandList =
             new SortedDictionary<string, MyComandStruct>();
 
+        static Dictionary<string, string> banList = new Dictionary<string, string>();
+
         internal static void AddConsoleCommand(string command, MyComandStruct mcs)
         {
             if (!consoleCommandList.ContainsKey(command))
-                 consoleCommandList.Add(command, mcs);
+                consoleCommandList.Add(command, mcs);
+        }
+
+        public static void TryBanUser(Message message, string id, string description)
+        {
+            if (banList.ContainsKey(id))
+            {
+                Console.WriteLine("---------------------------------------------------------------------");
+                Console.WriteLine("[ERROR] Пользователь " + id + " уже был забанен");
+                Console.WriteLine("---------------------------------------------------------------------");
+                SendMessage(message, "[ERROR] Пользователь " + id + " уже был забанен",
+                                      message.ChatId != null);
+            }
+
+            else
+            {
+                banList.Add(id, description);
+                SendMessage(message, "Пользователь " + id + " ЗАбанен!",
+                                      message.ChatId != null);
+            }
+        }
+        public static void TryUnBanUser(Message message, string id)
+        {
+            if (banList.ContainsKey(id))
+            {
+                banList.Remove(id);
+                SendMessage(message, "Пользователь " + id + " был РАЗбанен!",
+                                      message.ChatId != null);
+            }
+
+            else
+            {
+                Console.WriteLine("---------------------------------------------------------------------");
+                Console.WriteLine("[ERROR] Пользователь " + id + " не был забанен");
+                Console.WriteLine("---------------------------------------------------------------------");
+                SendMessage(message, "[ERROR] Пользователь " + id + " не был забанен",
+                                      message.ChatId != null);
+            }
         }
 
         private static void BOT_API_ClearCommands(object sender, EventArgs e)
         {
             commandList.Clear();
+            banList.Clear();
         }
 
         internal static void ConsoleCommand(string command)
@@ -70,6 +110,12 @@ namespace BOT_Platform
 
         internal static void TryCommand(string command, Message message, params object[] obj)
         {
+            if (banList.ContainsKey(message.UserId.ToString()))
+            {
+                SendMessage(message, banList[message.UserId.ToString()],
+                                          message.ChatId != null);
+                return;
+            }
             if (commandList.ContainsKey(command))
             {
                 try
@@ -124,6 +170,7 @@ namespace BOT_Platform
                                    "Команда уже определена.\n");
         }
 
+        //МОЖНО ВЫНЕСТИ В CONST STRING
         internal static List<string> GetCommandList(bool isBotCommands = false)
         {
             List<string> list = new List<string>();

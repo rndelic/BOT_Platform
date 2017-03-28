@@ -30,7 +30,7 @@ namespace MyFunctions
             CommandsList.TryAddCommand("вычисли", new MyComandStruct(
                                        "вычисли(выражение с /,*,+,-) beta = баги", Solve));
             CommandsList.TryAddCommand("поддержка", new MyComandStruct(
-                                       "Обратиться к разработчику", Support, true));
+                                       "Обратиться к разработчику", Support));
         }
 
         public MainFunctions()
@@ -141,7 +141,8 @@ namespace MyFunctions
                 AnonChat.ChatSend(message, param[0], param[1]);
                 return;
             }
-
+            #region
+            /*
             param[0] = param[0].Replace(" ", "");
             int index = param[0].ToString().LastIndexOf('/');
             if (index != -1) param[0] = param[0].ToString().Substring(index + 1);
@@ -167,6 +168,9 @@ namespace MyFunctions
             {
                 param[0] = BOT_API.app.Users.Get(param[0]).Id.ToString();
             }
+            */
+            #endregion
+            Functions.GetUserId(ref param[0]);
 
             message.UserId = Convert.ToInt32(param[0]);
             try

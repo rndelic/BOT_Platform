@@ -76,6 +76,7 @@ namespace MyFunctions
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             const string FONT_NAME = "Arial Black";
+            const float mlp = 1f;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -93,12 +94,13 @@ namespace MyFunctions
                     //g.CompositingQuality = CompositingQuality.HighQuality;
 
                     FontFamily ff = new FontFamily(FONT_NAME);
-                    Font font = new Font(ff, (image.Width / text[0].Length), FontStyle.Regular);
+                    Font font = new Font(ff, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp, FontStyle.Regular);
                     StringFormat sf = new StringFormat();
 
                     SizeF textSize = graphics.MeasureString(text[0], font);
+
                     GraphicsPath gp = new GraphicsPath();
-                    gp.AddString(text[0], ff, (int)FontStyle.Regular, (image.Width / text[0].Length) + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
+                    gp.AddString(text[0], ff, (int)FontStyle.Regular, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
 
                     GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
                     // outline the path
@@ -125,12 +127,12 @@ namespace MyFunctions
                     //g.CompositingQuality = CompositingQuality.HighQuality;
 
                     FontFamily ff = new FontFamily(FONT_NAME);
-                    Font font = new Font(ff, (image.Width / text[1].Length), FontStyle.Regular);
+                    Font font = new Font(ff, Math.Min((image.Width / text[1].Length), image.Height / 4) * mlp, FontStyle.Regular);
                     StringFormat sf = new StringFormat();
 
                     SizeF textSize = graphics.MeasureString(text[1], font);
                     GraphicsPath gp = new GraphicsPath();
-                    gp.AddString(text[1], ff, (int)FontStyle.Regular, (image.Width / text[1].Length) + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
+                    gp.AddString(text[1], ff, (int)FontStyle.Regular, Math.Min((image.Width / text[1].Length), image.Height / 4) * mlp + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
 
                     GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
                     // outline the path
@@ -153,12 +155,12 @@ namespace MyFunctions
                     //g.CompositingQuality = CompositingQuality.HighQuality;
 
                     FontFamily ff = new FontFamily(FONT_NAME);
-                    Font font = new Font(ff, (image.Width / text[0].Length), FontStyle.Regular);
+                    Font font = new Font(ff, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp, FontStyle.Regular);
                     StringFormat sf = new StringFormat();
 
                     SizeF textSize = graphics.MeasureString(text[0], font);
                     GraphicsPath gp = new GraphicsPath();
-                    gp.AddString(text[0], ff, (int)FontStyle.Regular, (image.Width / text[0].Length) + 1, new PointF((image.Width - textSize.Width) / 2, 0), sf); //image.Height * 0.04f
+                    gp.AddString(text[0], ff, (int)FontStyle.Regular, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp + 1, new PointF((image.Width - textSize.Width) / 2, 0), sf); //image.Height * 0.04f
 
                     GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
                     // outline the path

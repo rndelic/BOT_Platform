@@ -20,19 +20,51 @@ namespace MyFunctions
         {
             CommandsList.TryAddCommand("сон", new MyComandStruct(
                                        "дистанционно выключить ПК", OffPC, true));
+            CommandsList.TryAddCommand("бан", new MyComandStruct(
+                                       "бан юзера", Ban, true));
+            CommandsList.TryAddCommand("разбан", new MyComandStruct(
+                                       "разбан юзера", UnBan, true));
             CommandsList.TryAddCommand("блок", new MyComandStruct(
                                        "блокировать ввод", Block, true));
             CommandsList.TryAddCommand("разблок", new MyComandStruct(
                                        "разблокировать ввод", UnBlock, true));
         }
 
+        private void Ban(Message message, object[] p)
+        {
+            if (!CheckRoots(message.UserId))
+            {
+                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                return;
+            }
+            string[] param = p[0].ToString().Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            CommandsList.TryBanUser(message, Functions.GetUserId(param[0]), param[1]);
+        }
+
+        private void UnBan(Message message, object[] p)
+        {
+            if (!CheckRoots(message.UserId))
+            {
+                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                return;
+            }
+            CommandsList.TryUnBanUser(message, Functions.GetUserId(p[0].ToString()));
+        }
+
+        bool CheckRoots(long? UserId)
+        {
+            if (UserId != 150887062 && UserId != 262045406) return false;
+            return true;
+        }
         public PCcontrols()
         {
             AddMyCommandInPlatform();
         }
+
+
         void Block(Message message, params object[] p)
         {
-            if (message.UserId != 150887062 && message.UserId != 262045406)
+            if (!CheckRoots(message.UserId))
             {
                 Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
                 return;
@@ -43,7 +75,7 @@ namespace MyFunctions
         }
         void UnBlock(Message message, params object[] p)
         {
-            if (message.UserId != 150887062 && message.UserId != 262045406)
+            if (!CheckRoots(message.UserId))
             {
                 Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
                 return;
@@ -55,7 +87,7 @@ namespace MyFunctions
 
         void OffPC(Message message, params object[] p)
         {
-            if (message.UserId != 150887062 && message.UserId != 262045406)
+            if (!CheckRoots(message.UserId))
             {
                 Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
                 return;

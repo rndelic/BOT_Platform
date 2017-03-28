@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VkNet.Model;
 using VkNet.Model.Attachments;
@@ -89,6 +90,64 @@ namespace BOT_Platform
                 }
             }
             return contains;
+        }
+
+        public static void GetUserId(ref string url)
+        {
+            url = url.Replace(" ", "");
+            int index = url.ToString().LastIndexOf('/');
+            if (index != -1) url = url.ToString().Substring(index + 1);
+
+            Regex reg = new Regex("[a-z|A-Z]");
+            bool regexIsFoundInFull = reg.IsMatch(url);
+
+            //Если нашёл "id"
+            index = url.ToString().IndexOf("id");
+            if (index == 0)
+            {
+                if (!reg.IsMatch(url.ToString().Substring(2)))
+                {
+                    url = url.ToString().Substring(2);
+                }
+                else
+                {
+                    url = BOT_API.app.Users.Get(url).Id.ToString();
+                }
+            }
+
+            else if (reg.IsMatch(url))
+            {
+                url = BOT_API.app.Users.Get(url).Id.ToString();
+            }
+        }
+        public static string GetUserId(string url)
+        {
+            url = url.Replace(" ", "");
+            int index = url.ToString().LastIndexOf('/');
+            if (index != -1) url = url.ToString().Substring(index + 1);
+
+            Regex reg = new Regex("[a-z|A-Z]");
+            bool regexIsFoundInFull = reg.IsMatch(url);
+
+            //Если нашёл "id"
+            index = url.ToString().IndexOf("id");
+            if (index == 0)
+            {
+                if (!reg.IsMatch(url.ToString().Substring(2)))
+                {
+                    url = url.ToString().Substring(2);
+                }
+                else
+                {
+                    url = BOT_API.app.Users.Get(url).Id.ToString();
+                }
+            }
+
+            else if (reg.IsMatch(url))
+            {
+                url = BOT_API.app.Users.Get(url).Id.ToString();
+            }
+            return url;
         }
     }
 }
