@@ -8,34 +8,6 @@ using VkNet.Model;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 
-/*
-     copy.Save(Filename, ImageFormat.Png);
-                var uploadServer = vk.Photo.GetMessagesUploadServer();
-        
-                var wc = new WebClient();
-                var responseImg = Encoding.Default.GetString(wc.UploadFile(uploadServer.UploadUrl, Filename));           
-                ReadOnlyCollection<Photo> photo  = vk.Photo.SaveMessagesPhoto(responseImg);
-
-                VkNet.Model.RequestParams.MessagesSendParams param = new MessagesSendParams();
-
-                param.Attachments = photo;
-                if (id == vk.UserId) param.UserId = id;
-                if (id < 0) param.ChatId = -id;
-                else param.UserId = id;
-                if (Message == "") Message = "\n";
-                param.Message = Message;
-                take = 0;
-                vk.Messages.Send(param);
-                notify_hide.BalloonTipTitle = "Скриншот был успешно отправлен :)";
-                notify_hide.BalloonTipText = "Скриншот был отправлен пользователю " + form3.dialog_list.SelectedItem;
-                notify_hide.ShowBalloonTip(300);
-
-                form3.Close();
-                form3 = null;
-                File.Delete(Filename);
-                gkh.hook();
- */
-
 
 namespace BOT_Platform
 {
@@ -45,7 +17,7 @@ namespace BOT_Platform
                                                             * Распологается в одной папке с исполняемым файлом
                                                             */
         internal static volatile VkApi app = new VkApi();  /* Обьект самого приложения VK.NET */
-        internal static PlatformSettings platformSett;     /* Здесь хранятся все настройки бота */
+        internal volatile static PlatformSettings platformSett;     /* Здесь хранятся все настройки бота */
 
         const string DevNamespace = "MyFunctions";         /* Пространоство имён, содержащее только
                                                             * пользовательские функции

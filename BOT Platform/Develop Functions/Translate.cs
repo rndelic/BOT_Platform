@@ -6,6 +6,7 @@ using Google.API.Translate;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace MyFunctions
 {
@@ -20,9 +21,11 @@ namespace MyFunctions
         {
             string[] param = p[0].ToString().Split(new char[] { ';' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString())|| p[0].ToString() == "!" || param.Length == 0)
+            Regex regex = new Regex("((\\W)*(\\d)*)*");
+
+            if (regex.Match(p[0].ToString()).Value == p[0].ToString())
             {
-                Functions.SendMessage(message, "Я умею переводить пустые запросы на русский: \"НЕ ИСПЫТЫВАЙ МОЁ ТЕРПЕНИЕ\"", message.ChatId != null);
+                Functions.SendMessage(message, "Я умею переводить пустые запросы на русский: \n\"НЕ ИСПЫТЫВАЙ МОЁ ТЕРПЕНИЕ\"", message.ChatId != null);
                 return;
             }
 
