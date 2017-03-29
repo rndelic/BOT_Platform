@@ -99,7 +99,7 @@ namespace MyFunctions
                 int index = userId[i].ToString().LastIndexOf('/');
                 if (index != -1) userId[i] = userId[i].ToString().Substring(index + 1);
 
-                Regex reg = new Regex("[a-z|A-Z]");
+                Regex reg = new Regex("[а-я|А-Я|a-z|A-Z]");
                 bool regexIsFoundInFull = reg.IsMatch(userId[i]);
 
                 //Если нашёл "id"
@@ -120,8 +120,16 @@ namespace MyFunctions
 
                 else if (reg.IsMatch(userId[i]))
                 {
-                    userId[i]  = BOT_API.app.Users.Get(userId[i]).Id.ToString();
-                }
+                    try
+                    {
+                        userId[i] = BOT_API.app.Users.Get(userId[i]).Id.ToString();
+                    }
+                    catch
+                    {
+                        Functions.SendMessage(message, "Неверная ссылка: \"" + userId[i] + "\" не является пользователем ¯\\_(ツ)_/¯.", message.ChatId != null);
+                        continue;
+                    }
+            }
 
                 message.UserId = Convert.ToInt32(userId[i]);
                 if (chat.usersId.ContainsKey(message.UserId.Value)) continue;
@@ -130,7 +138,7 @@ namespace MyFunctions
                 {
                     Functions.SendMessage(message, description.Replace("[TITLE]",chatTitle));
                 }
-                catch (VkNet.Exception.VkApiException ex)
+                catch (Exception ex)
                 {
                     message.UserId = answerId;
                     User user = BOT_API.app.Users.Get(Convert.ToInt32(userId[i]));
@@ -166,11 +174,13 @@ namespace MyFunctions
                                      "¯\\_(ツ)_/¯.", message.ChatId != null);
                 return;
             }
-
             long answerId = message.UserId.Value;
 
+            MessagesSendParams sendParams = new MessagesSendParams();
+
+            if (mesBody[0] == '!') sendParams = SpeechText.MakeSpeechAttachment(mesBody.Substring(1));
             KeyValuePair<long, uint>[] usersId = Chats[chatTitle].usersId.Where(t => t.Key != message.UserId.Value).ToArray();
-            for(int i=0; i<usersId.Length; i++)
+            for (int i = 0; i < usersId.Length; i++)
             {
                 try
                 {
@@ -178,13 +188,16 @@ namespace MyFunctions
                     {
                         UserId = usersId[i].Key,
                     };
-                    Functions.SendMessage(m, "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value]  + " аноним: " + mesBody, m.ChatId != null);
+                    if(mesBody[0] != '!')
+                        Functions.SendMessage(m, "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value] + " аноним: " + mesBody, m.ChatId != null);
+                    else
+                        Functions.SendMessage(m, sendParams, "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value] + " аноним: [аудиоосообщение]", m.ChatId != null);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     User user = BOT_API.app.Users.Get(usersId[i].Value);
                     Functions.SendMessage(message, "Не удалось доставить сообщение " +
-                                                   usersId[i].Value + " анониму ¯\\_(ツ)_/¯."  , message.ChatId != null);
+                                                   usersId[i].Value + " анониму ¯\\_(ツ)_/¯.", message.ChatId != null);
                 }
                 //Thread.Sleep(BOT_API.platformSett.Delay);
             }

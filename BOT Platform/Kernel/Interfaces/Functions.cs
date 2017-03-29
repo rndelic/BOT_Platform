@@ -149,5 +149,25 @@ namespace BOT_Platform
             }
             return url;
         }
+
+        public static void CheckURL(ref string s)
+        {
+           s = s.Replace(" ", "%20")
+                .Replace("&", "%26")
+                .Replace("#", "%23")
+                .Replace("\\", "%26%23092%3B")
+                .Replace(",", "%2C")
+                .Replace("/", "%2F");
+        }
+
+        public static string CheckURL(string s)
+        {
+            return s.Replace(" ", "%20")
+                 .Replace("&", "%26")
+                 .Replace("#", "%23")
+                 .Replace("\\", "%26%23092%3B")
+                 .Replace(",", "%2C")
+                 .Replace("/", "%2F");
+        }
     }
 }

@@ -60,12 +60,11 @@ namespace MyFunctions
                     else if (photo.Photo130  != null) webClient.DownloadFile(photo.Photo130,  IN_FILENAME);
                     else if (photo.Photo75   != null) webClient.DownloadFile(photo.Photo75,   IN_FILENAME);
 
+                    webClient.Dispose();
                     DrawAndSave(text);
                     photoList.Add(SavePhoto());
 
                     Upload(message, photoList);
-
-                    webClient.Dispose();
 
                     File.Delete(OUT_FILENAME);
         }

@@ -30,33 +30,36 @@ namespace MyFunctions
 
         }
 
-
-        void Speech(Message message, params object[] p)
+        
+        public static void Speech(Message message, params object[] p)
         {
-         
+            Functions.SendMessage(message, MakeSpeechAttachment(p[0].ToString()),"", message.ChatId != null);
+        }
+
+        public static MessagesSendParams MakeSpeechAttachment(string text)
+        {
             SpeechSynthesizer speechSynth = new SpeechSynthesizer(); // создаём объект
             speechSynth.Volume = 100; // устанавливаем уровень звука
-            speechSynth.Rate   = 2;
+            speechSynth.Rate = 2;
 
-            speechSynth.SetOutputToWaveFile(FILENAME, 
+            speechSynth.SetOutputToWaveFile(FILENAME,
                                         new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
             //speechSynth.SelectVoice("Microsoft Pavel Mobile");
 
-            speechSynth.Speak(p[0].ToString() + ENDING); // озвучиваем переданный текст
+            speechSynth.Speak(text + ENDING); // озвучиваем переданный текст
             speechSynth.SetOutputToNull();
 
             ConverWavToMp3();
 
             List<Audio> audioList = new List<Audio>();
-            audioList.Add(UploadAndSave(p[0].ToString()));
+            audioList.Add(UploadAndSave(text));
 
             MessagesSendParams param = new MessagesSendParams();
             param.Attachments = new ReadOnlyCollection<Audio>(audioList);
 
-            Functions.SendMessage(message, param,"", message.ChatId != null);
-
+            return param;
         }
-        Audio UploadAndSave(string title)
+        static Audio UploadAndSave(string title)
         {
             Uri uploadServer = BOT_API.app.Audio.GetUploadServer();
 
@@ -81,7 +84,7 @@ namespace MyFunctions
             AddMyCommandInPlatform();
         }
 
-        void ConverWavToMp3()
+        static void ConverWavToMp3()
         {
             WaveStream InStr = new WaveStream(FILENAME);
             try

@@ -18,13 +18,7 @@ namespace MyFunctions
 
         private void FindWiki(Message message, object[] p)
         {
-            string request = p[0].ToString()
-                .Replace(" ", "%20")
-                .Replace("&", "%26")
-                .Replace("#", "%23")
-                .Replace("\\", "%26%23092%3B")
-                .Replace(",", "%2C")
-                .Replace("/", "%2F");
+            string request = Functions.CheckURL(p[0].ToString());
 
             var webClient = new WebClient();
             string local = "ru";

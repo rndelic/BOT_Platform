@@ -134,7 +134,8 @@ namespace MyFunctions
         {
             string[] param = p[0].ToString().Split(new char[1] { ',' }, 2, StringSplitOptions.None);
 
-            long? answerId =  message.UserId;
+            long? answerId = message.UserId;
+            Functions.RemoveSpaces(ref param[1]);
 
             if (param[0].Contains("\""))
             {
@@ -171,11 +172,18 @@ namespace MyFunctions
             */
             #endregion
             Functions.GetUserId(ref param[0]);
+            message.UserId = Convert.ToInt32(param[0]); ;
 
-            message.UserId = Convert.ToInt32(param[0]);
             try
             {
-                Functions.SendMessage(message, "Служба анонимной почты, вам письмо:\n" + param[1]);
+                if (param[1][0] != '!')
+                    Functions.SendMessage(message, "Служба анонимной почты, вам письмо:\n" + param[1]);
+                
+                else
+                {
+                    Functions.SendMessage(message, SpeechText.MakeSpeechAttachment(param[1].Substring(1)),
+                        "Служба анонимной почты, вам аудиосообщение:\n");
+                }   
             }
             catch (VkNet.Exception.VkApiException ex)
             {
@@ -186,7 +194,7 @@ namespace MyFunctions
             }
             message.UserId = answerId;
             Functions.SendMessage(message, "Доставлено!", message.ChatId!=null);
-        }
+            }
 
         private string SolveExample(string test)
         {

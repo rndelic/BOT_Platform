@@ -12,7 +12,19 @@ namespace MyFunctions
             CommandsList.TryAddCommand("мат-мех", new MyComandStruct("Специально для Мат-Меха", MM));
             CommandsList.TryAddCommand("о себе", new MyComandStruct("Тебе правда интересно?", Biography));
             CommandsList.TryAddCommand("как сдать", new MyComandStruct("Как сдать матан?", HowTo,true));
+            CommandsList.TryAddCommand("дай на шмот", new MyComandStruct("Для тучи", Tucha, true));
             CommandsList.TryAddCommand("ты солнышко", new MyComandStruct("", Jane, true));
+        }
+
+        private void Tucha(Message message, object[] p)
+        {
+            if (message.UserId == 65533985)
+                Functions.SendMessage(message, "Лови, Тучка, 100000$ 💰😉👌", message.ChatId != null);
+            else 
+            {
+                //Functions.SendMessage(message, "Ты не Тучка ;/ Скорее всего, ты Кверти, ко-ко-ко.", message.ChatId != null);
+                //SpeechText.Speech(message, "Кверти-петух, ко-ко-ко");
+            }
         }
 
         void Jane(Message message, object[] p)

@@ -56,12 +56,7 @@ namespace MyFunctions
             sB.Append("[https://vk.com/wall");
             sB.Append(finalID );
             sB.Append("?owners_only=1&q=");
-            sB.Append(param[1].Replace(" ", "%20")
-                              .Replace("&", "%26")
-                              .Replace("#", "%23")
-                              .Replace("\\", "%26%23092%3B")
-                              .Replace(",", "%2C")
-                              .Replace("/","%2F") + "]");
+            sB.Append(Functions.CheckURL(param[1]) + "]");
             Functions.SendMessage(message, sB.ToString(), message.ChatId != null);
 
         }
