@@ -77,8 +77,8 @@ namespace MyFunctions
             Image image = Image.FromFile(IN_FILENAME);
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            const string FONT_NAME = "Impact";//"Arial Black";
-            const float mlp = 1.5f;
+            const string FONT_NAME = "Arial Black";
+            const float mlp = 1f;
 
             for (int i = 0; i < text.Length; i++)
             {

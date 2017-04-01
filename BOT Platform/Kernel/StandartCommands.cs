@@ -43,6 +43,9 @@ namespace BOT_Platform
             else if (message.Body == "undebug")
             {
                 BOT_API.platformSett.IsDebug = false;
+                if(BOT_API.botThread != null)
+                    BOT_API.botThread.Abort("Перезапуск потока botThread");
+
                 BOT_API.botThread = new Thread(BOT_API.BotWork)
                 {
                     Priority = ThreadPriority.AboveNormal

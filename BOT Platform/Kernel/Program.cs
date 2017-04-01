@@ -109,7 +109,6 @@ namespace BOT_Platform
                 Console.WriteLine("[ERROR][SYSTEM]:\n" + ex.Message + "\n");
                 CommandsList.ConsoleCommand("debug");
             }
-            //Console.WriteLine(ConnectivityChecker.CheckInternet());
             lastMessages = new List<Message>();
             currentTimerTime = Environment.TickCount;
 
@@ -130,11 +129,25 @@ namespace BOT_Platform
                 catch (Exception ex)
                 {
                     Console.WriteLine("[ERROR][SYSTEM " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
+
+                    TryToRestartSystem();
                     Thread.Sleep(platformSett.Delay);
                     continue;
                 }
             }
 
+        }
+
+        static void TryToRestartSystem()
+        {
+            if (!ConnectivityChecker.CheckConnection())
+            {
+                while (!ConnectivityChecker.CheckConnection())
+                {
+                    Thread.Sleep(30000);
+                }
+                CommandsList.ConsoleCommand("restart");
+            }
         }
 
         static void ExecuteCommand(MessagesGetObject messages, ref List<Message> lastMessages)
@@ -161,8 +174,7 @@ namespace BOT_Platform
 
                 string temp = messages.Messages[i].Body;
                 messages.Messages[i].Body = comInfo.command;
-                CommandsList.TryCommand(comInfo.command,
-                                        messages.Messages[i],
+                CommandsList.TryCommand(messages.Messages[i],
                                         comInfo.param);
                 messages.Messages[i].Body = temp;
 

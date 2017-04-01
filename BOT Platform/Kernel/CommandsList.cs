@@ -133,7 +133,7 @@ namespace BOT_Platform
                                          "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.platformSett.BotName[0] + ", команды) " +
                                          "или повторите запрос позже.\n\n" +
 
-                                          $"Для получения справки по команде напишите {BOT_API.platformSett.BotName}, {message.Body}",
+                                          $"Для получения справки по команде напишите {BOT_API.platformSett.BotName[0]}, {message.Body}",
                                           message.ChatId != null);
                 }
             }

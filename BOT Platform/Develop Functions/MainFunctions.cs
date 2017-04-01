@@ -38,11 +38,13 @@ namespace MyFunctions
         }
         void Solve(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             Functions.SendMessage(message, SolveExample(p[0].ToString()), message.ChatId != null);
         }
 
         void Like(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             string http = p[0].ToString();
 
             string foundPhoto = "photo";
@@ -94,6 +96,7 @@ namespace MyFunctions
 
         void What(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             string[] param = p[0].ToString().Split(new char[1] { ',' }, StringSplitOptions.None);
             Random rand = new Random();
 
@@ -107,6 +110,7 @@ namespace MyFunctions
 
         void BRandom(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             Random rand = new Random();
             if(p[0] == null) Functions.SendMessage(message, "🎲 " + rand.Next().ToString(), message.ChatId != null);
             else
@@ -121,11 +125,13 @@ namespace MyFunctions
 
         void Say(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             Functions.SendMessage(message, p[0].ToString(), message.ChatId != null);
         }
 
         void AnonimSend(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             string[] param = p[0].ToString().Split(new char[1] { ',' }, 2, StringSplitOptions.None);
 
             long? answerId = message.UserId;
@@ -498,7 +504,24 @@ namespace MyFunctions
 
         public bool NeedCommandInfo(Message message, params object[] p)
         {
-            throw new NotImplementedException();
+            string info = "";
+            switch (message.Body)
+            {
+                case "анонимно":/*
+                    result =
+                        $"Справка по команде \"{message.Body}\":\n\n" +
+               "Бот отправляет указаннму в скобках человеку или чату анонимное сообщение или аудиосообщение. Ваше имя отображаться не будет.\n\n" +
+               "Для того, чтобы отправить сообщение"
+              */
+                    info = "Справка по данной команде ещё не написана";
+                    break;
+            }
+            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            {
+                Functions.SendMessage(message, info, message.ChatId != null);
+                return true;
+            }
+            return false;
         }
     }
 }
