@@ -9,5 +9,6 @@ namespace BOT_Platform
         /// </summary>
         /// <returns></returns>
         void AddMyCommandInPlatform();
+        bool NeedCommandInfo(Message message, params object[] p);
     }
 }

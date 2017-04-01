@@ -108,7 +108,7 @@ namespace BOT_Platform
                 consoleCommandList[command].Function(new Message() { Body = command});
         }
 
-        internal static void TryCommand(string command, Message message, params object[] obj)
+        internal static void TryCommand(Message message, params object[] obj)
         {
             if (banList.ContainsKey(message.UserId.ToString()))
             {
@@ -116,28 +116,31 @@ namespace BOT_Platform
                                           message.ChatId != null);
                 return;
             }
-            if (commandList.ContainsKey(command))
+            if (commandList.ContainsKey(message.Body))
             {
                 try
                 {
-                  commandList[command].Function(message, obj);
+                  commandList[message.Body].Function(message, obj);
                 }
 
                 catch (Exception ex)
                 {
                     Console.WriteLine("---------------------------------------------------------------------");
                     Console.WriteLine("[ERROR] \""+ message.Body+"\"\n" + ex.Message);
+                    Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
                     Console.WriteLine("---------------------------------------------------------------------");
                     SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
                                          "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.platformSett.BotName[0] + ", команды) " +
-                                         "или повторите запрос позже.",
+                                         "или повторите запрос позже.\n\n" +
+
+                                          $"Для получения справки по команде напишите {BOT_API.platformSett.BotName}, {message.Body}",
                                           message.ChatId != null);
                 }
             }
 
             else
             {
-               SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
+              if(message.UserId != BOT_API.app.UserId)  SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
                                     "или воспользуйтесь командой " + BOT_API.platformSett.BotName[0] + ", команды.",
                                     message.ChatId != null);
             }

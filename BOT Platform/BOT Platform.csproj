@@ -98,8 +98,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandDetector.cs" />
+    <Compile Include="Develop Functions\Delelop Libs\Gif\AnimatedGifEncoder.cs" />
     <Compile Include="Develop Functions\AnonChat.cs" />
+    <Compile Include="Develop Functions\Delelop Libs\Gif\GifDecoder.cs" />
+    <Compile Include="Develop Functions\Delelop Libs\Gif\LZWEncoder.cs" />
+    <Compile Include="Develop Functions\Delelop Libs\Gif\NeuQuant.cs" />
     <Compile Include="Develop Functions\Delelop Libs\LongAr.cs" />
+    <Compile Include="Develop Functions\GifAnimation.cs" />
     <Compile Include="Develop Functions\PCcontrols.cs" />
     <Compile Include="Develop Functions\MainFunctions.cs" />
     <Compile Include="Develop Functions\GroupWall.cs" />
@@ -121,6 +126,7 @@
     <Compile Include="Kernel\StandartCommands.cs" />
     <Compile Include="Develop Functions\WikiPedia.cs" />
     <Compile Include="Develop Functions\Translate.cs" />
+    <Compile Include="WatchDogNET.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

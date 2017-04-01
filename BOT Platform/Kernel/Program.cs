@@ -13,7 +13,7 @@ namespace BOT_Platform
 {
     static partial class BOT_API
     {
-        static volatile string DATA_FILENAME = "data.ini"; /* Файл с настройками. 
+        static volatile string DATA_FILENAME = "Data\\data.ini"; /* Файл с настройками. 
                                                             * Распологается в одной папке с исполняемым файлом
                                                             */
         internal static volatile VkApi app = new VkApi();  /* Обьект самого приложения VK.NET */
@@ -109,7 +109,7 @@ namespace BOT_Platform
                 Console.WriteLine("[ERROR][SYSTEM]:\n" + ex.Message + "\n");
                 CommandsList.ConsoleCommand("debug");
             }
-
+            //Console.WriteLine(ConnectivityChecker.CheckInternet());
             lastMessages = new List<Message>();
             currentTimerTime = Environment.TickCount;
 
@@ -141,7 +141,7 @@ namespace BOT_Platform
         {
             for (int i = 0; i < messages.Messages.Count; i++)
             {
-               
+                if (String.IsNullOrEmpty(messages.Messages[i].Body)) continue;
 
                 string botName = FindBotNameInMessage(messages.Messages[i]);
 
@@ -150,30 +150,7 @@ namespace BOT_Platform
 
                 if (Functions.ContainsMessage(messages.Messages[i], lastMessages)) continue;
 
-                int index = messages.Messages[i].Body.IndexOf('(');
-                int botNameIndex = messages.Messages[i].Body.IndexOf(botName + ",");
-
-                string command = messages.Messages[i].Body;
-                string param = null;
-
-                if (index != -1)
-                {
-                    command = messages.Messages[i].Body.Substring(0, index);
-                    param = messages.Messages[i].Body.Substring(index + 1);
-                    int ind = param.LastIndexOf(')');
-                    if (ind == -1)
-                    {
-                        param += ')';
-                        param = param.Remove(param.Length-1);
-                    }
-                    else param = param.Remove(ind);
-                }
-                if (messages.Messages[i].ChatId != null || (botNameIndex >=0 && botNameIndex < command.Length))
-                    command = command.Substring(botNameIndex + botName.Length + 1);
-
-                Functions.RemoveSpaces(ref command);
-
-                if (Char.IsUpper(command[0])) command = Char.ToLower(command[0]) + command.Substring(1);
+                CommandInfo comInfo = GetCommandFromMessage(messages.Messages[i], botName);
 
                 if (lastMessages.Count >= platformSett.MesRemembCount)
                 {
@@ -181,13 +158,57 @@ namespace BOT_Platform
                 }
                 lastMessages.Add(messages.Messages[i]);
 
-                CommandsList.TryCommand(command,
+
+                string temp = messages.Messages[i].Body;
+                messages.Messages[i].Body = comInfo.command;
+                CommandsList.TryCommand(comInfo.command,
                                         messages.Messages[i],
-                                        param);
+                                        comInfo.param);
+                messages.Messages[i].Body = temp;
 
                 Thread.Sleep(platformSett.Delay);
 
             }
+        }
+
+        struct CommandInfo
+        {
+            public string command { get; private set; }
+            public string param { get; private set; }
+
+            public CommandInfo(string command, string param)
+            {
+                this.command = command;
+                this.param = param;
+            }
+        }
+        static CommandInfo GetCommandFromMessage(Message message, string botName)
+        {
+            int index = message.Body.IndexOf('(');
+            int botNameIndex = message.Body.IndexOf(botName + ",");
+
+            string command = message.Body;
+            string param = null;
+
+            if (index != -1)
+            {
+                command = message.Body.Substring(0, index);
+                param = message.Body.Substring(index + 1);
+                int ind = param.LastIndexOf(')');
+                if (ind == -1)
+                {
+                    param += ')';
+                    param = param.Remove(param.Length - 1);
+                }
+                else param = param.Remove(ind);
+            }
+            if (message.ChatId != null || (botNameIndex >= 0 && botNameIndex < command.Length))
+                command = command.Substring(botNameIndex + botName.Length + 1);
+
+            Functions.RemoveSpaces(ref command);
+
+            if (Char.IsUpper(command[0])) command = Char.ToLower(command[0]) + command.Substring(1);
+            return new CommandInfo(command, param);
         }
 
         static string FindBotNameInMessage(Message message)

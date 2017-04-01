@@ -106,5 +106,10 @@ namespace BOT_Platform
 
             Functions.SendMessage(message, sb.ToString(), message.ChatId != null);
         }
+
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

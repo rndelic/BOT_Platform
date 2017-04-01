@@ -33,6 +33,7 @@ namespace MyFunctions
         
         public static void Speech(Message message, params object[] p)
         {
+            if (NeedCommandInfo1(message, p)) return;
             Functions.SendMessage(message, MakeSpeechAttachment(p[0].ToString()),"", message.ChatId != null);
         }
 
@@ -111,5 +112,24 @@ namespace MyFunctions
             }
         }
 
+        public static bool NeedCommandInfo1(Message message, params object[] p)
+        {
+            string info = $"Справка по команде \"{message.Body}\":\n\n" +
+                "Команда голосом бота озвучивает указанный в скобках текст.\n\n" +
+                $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(я тебя люблю, не знаю почему) - бот озвучит и отправит аудиозапись с озвученным текстом.\n\n" +
+                $"Данная функция реализована с помощью The Microsoft Cognitive Toolkit (Speech)";
+
+            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            {
+                Functions.SendMessage(message, info, message.ChatId != null);
+                return true;
+            }
+            return false;
+        }
+
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

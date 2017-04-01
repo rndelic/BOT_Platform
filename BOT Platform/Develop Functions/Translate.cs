@@ -19,6 +19,7 @@ namespace MyFunctions
 
         private void TranslateIt(Message message, object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             string[] param = p[0].ToString().Split(new char[] { ';' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
             Regex regex = new Regex("((\\W)*(\\d)*)*");
@@ -47,6 +48,31 @@ namespace MyFunctions
             else result = YT.Translate(Functions.RemoveSpaces(param[1]), param[0]);
           
             Functions.SendMessage(message,"✎ " + result, message.ChatId != null);
+        }
+
+
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            {
+                string info = $"Справка по команде \"{message.Body}\":\n\n" +
+
+                    "Команда переводит указанный в скобках текст.\n" +
+                    "Для того, чтобы перевести текст с любого языка на английский - просто напишите текст в скобочках.\n" +
+                    $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(привет) - бот напишет \"hello\".\n\n" +
+                    "Для того, чтобы перевести текст с любого языка на русский - поставьте перед текстом !\n" +
+                    $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(!hello) - бот напишет \"привет\"\n\n" +
+                    "Для того, чтобы перевести текст на любой язык - укажите в скобках параметр языка и поставьте ; а затем напишите текст.\n" +
+                    $"Пример для украинского языка (uk): {BOT_API.platformSett.BotName[0]}, {message.Body}(uk; привет) - бот напишет \"привiт\"\n\n" +
+                    "Чтобы узнать параметр нужного вам языка, перейдите по https://tech.yandex.ru/translate/doc/dg/concepts/api-overview-docpage/ в меню \"Поддерживаемые языки\"\n\n" +
+                    "Данная функция реализована с помощью Yandex.Translate API";
+
+                if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+                {
+                    Functions.SendMessage(message, info, message.ChatId != null);
+                    return true;
+                }
+                return false;
+            }
         }
 
         class YandexTranslator

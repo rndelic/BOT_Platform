@@ -15,10 +15,10 @@ using VkNet.Model.RequestParams;
 
 namespace MyFunctions
 {
-    class Mems
+    class Mems: IMyCommands
     {
-        const string OUT_FILENAME = "out_mem.jpg";
-        const string IN_FILENAME = "in_mem.jpg";
+        const string OUT_FILENAME = "Data\\out_mem.jpg";
+        const string IN_FILENAME = "Data\\in_mem.jpg";
         public void AddMyCommandInPlatform()
         {
             CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
@@ -26,6 +26,8 @@ namespace MyFunctions
 
         private void MakeMem(Message message, object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
+
             List<Photo> photoList = new List<Photo>();
             var webClient = new WebClient();
             string[] text = p[0].ToString().Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
@@ -67,6 +69,7 @@ namespace MyFunctions
                     Upload(message, photoList);
 
                     File.Delete(OUT_FILENAME);
+                    File.Delete(IN_FILENAME);
         }
 
         void DrawAndSave(string[] text)
@@ -74,8 +77,8 @@ namespace MyFunctions
             Image image = Image.FromFile(IN_FILENAME);
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            const string FONT_NAME = "Arial Black";
-            const float mlp = 1f;
+            const string FONT_NAME = "Impact";//"Arial Black";
+            const float mlp = 1.5f;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -199,6 +202,23 @@ namespace MyFunctions
             Functions.SendMessage(message, param, "", message.ChatId != null);
         }
 
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            string info = $"Справка по команде \"{message.Body}\":\n\n" +
+               "Бот комбинирует текст, указанный в скобках, и прикреплённое сообщение.\n\n" +
+               "Учтите, что прикреплять нужно одно изображение, а текст не должен быть намного длиннее ширины изображения, иначе бот выдаст ошибку.\n\n" +
+               "Для того, чтобы текст был написан лишь на нижней части изображения, напишите его в скобках без разделителя ,(запятой).\n" +
+               $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(когда купил айфон) - бот отправит картинку с текстом внизу.\n\n" +
+               "Для того, чтобы текст был написан и сверху картинки, и снизу, поставьте в нужном месте запятую (если по какой-то причине запятых в тексте несколько, за разделитель бот примет самую первую (,)запятую.\n" +
+               $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(когда купил айфон, но понял, что любишь андроид) - внизу будет написано \"когда купил айфон\", а внизу - \"но понял, что люишь андроид\". Разделитесь в изображение не попадает.";
+
+            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            {
+                Functions.SendMessage(message, info, message.ChatId != null);
+                return true;
+            }
+            return false;
+        }
 
         public Mems()
         {

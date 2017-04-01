@@ -89,7 +89,7 @@ namespace BOT_Platform
                     break;
                 }
             }
-            return contains;
+            return contains; 
         }
 
         public static void GetUserId(ref string url)

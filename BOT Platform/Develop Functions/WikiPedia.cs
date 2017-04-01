@@ -18,6 +18,8 @@ namespace MyFunctions
 
         private void FindWiki(Message message, object[] p)
         {
+            if (NeedCommandInfo(message, p) == true) return;
+
             string request = Functions.CheckURL(p[0].ToString());
 
             var webClient = new WebClient();
@@ -49,6 +51,21 @@ namespace MyFunctions
 
             Functions.SendMessage(message, ss, message.ChatId != null);
 
+        }
+
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            string info = $"Справка по команде \"{message.Body}\":\n\n" +
+                "Команда находит статью в Википедии по заданному в скобках тексту.\n\n" +
+                "Обратите внимание, что имена собственные рекомендуется писать с заглавной буквы.\n\n" +
+                $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(Галилео Галилей) - бот найдёт и отправит статью о Галилее в Википедии";
+
+            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            {
+                Functions.SendMessage(message, info , message.ChatId != null);
+                return true;
+            }
+            return false;
         }
 
         public WikiPedia()

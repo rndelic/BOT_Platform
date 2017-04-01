@@ -19,8 +19,7 @@ namespace MyFunctions
                                        "анонимно(id получателя или ссылка, текст сообщения)", AnonimSend));
             CommandsList.TryAddCommand("скажи", new MyComandStruct(
                                        "скажи(текст сообщения).", Say));
-            CommandsList.TryAddCommand("время", new MyComandStruct(
-                                       "Я подскажу тебе, который час", Time));
+
             CommandsList.TryAddCommand("рандом", new MyComandStruct(
                                        "рандом, или рандом(макс знач.), или рандом(мин,макс)", BRandom));
             CommandsList.TryAddCommand("что", new MyComandStruct(
@@ -118,11 +117,6 @@ namespace MyFunctions
                 else
                     Functions.SendMessage(message, "🎲 " + rand.Next(Convert.ToInt32(param[0]), Convert.ToInt32(param[1])+1).ToString(), message.ChatId != null);
             }
-        }
-
-        void Time(Message message, params object[] p)
-        {
-            Functions.SendMessage(message, "На моих часах ⌚️ " + DateTime.Now.ToLongTimeString(), message.ChatId != null);
         }
 
         void Say(Message message, params object[] p)
@@ -289,8 +283,18 @@ namespace MyFunctions
                             example = example.Replace(")", " ) ");
                             example = example.Replace(".", ",");
                             example = example + " ";
+
+                            Regex temp = new Regex("\\s*[+-]\\s*\\d*\\s*");
+                            if(temp.Match(example).Value == example)
+                            {
+                                example = example.Replace(" ", "").Replace("+", "");
+                                return example;
+                            }
+
                             #endregion
                             break;
+                            
+
                         }
                     }
 
@@ -490,6 +494,11 @@ namespace MyFunctions
                 return "Пример записан неверно!\n\n" + ex.Message;  
             }
 
+        }
+
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            throw new NotImplementedException();
         }
     }
 }

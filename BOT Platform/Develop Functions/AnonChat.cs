@@ -284,5 +284,10 @@ namespace MyFunctions
             }
 
         }
+
+        public bool NeedCommandInfo(Message message, params object[] p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
