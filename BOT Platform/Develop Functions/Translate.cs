@@ -53,7 +53,6 @@ namespace MyFunctions
 
         public bool NeedCommandInfo(Message message, params object[] p)
         {
-            {
                 string info = $"Справка по команде \"{message.Body}\":\n\n" +
 
                     "Команда переводит указанный в скобках текст.\n" +
@@ -72,7 +71,6 @@ namespace MyFunctions
                     return true;
                 }
                 return false;
-            }
         }
 
         class YandexTranslator

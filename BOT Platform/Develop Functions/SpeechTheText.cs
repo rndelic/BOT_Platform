@@ -20,7 +20,7 @@ namespace MyFunctions
     {
         const string FILENAME    = "file.wav";
         const string FILENAMEMP3 = "file.mp3";
-        const string NAME        = "mmBOT";
+        public const string NAME        = "mmBOT";
 
         const string ENDING = ". ахахах этот бот лучше всех";
 

@@ -30,7 +30,7 @@ namespace BOT_Platform
             }
             else
             {
-                Console.WriteLine("[NET_INFO] Соединение с vk.com установлено.\n");
+                Console.WriteLine("[NET_INFO] Соединение с vk.com установлено (SUCCSSES).\n");
                 return true;
             }
         }

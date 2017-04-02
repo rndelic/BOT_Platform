@@ -57,6 +57,8 @@ namespace MyFunctions
 
         void StartChat(Message message, params object[] param)
         {
+            if (NeedCommandInfo(message, param)) return;
+
             string[] args    = param[0].ToString().Split(new char[1] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
             string chatTitle = Functions.RemoveSpaces(args[0]);
             string[] userId  = args[1].Split(new char[1] { ',' }, countOfUsers, StringSplitOptions.RemoveEmptyEntries);
@@ -287,7 +289,28 @@ namespace MyFunctions
 
         public bool NeedCommandInfo(Message message, params object[] p)
         {
-            throw new NotImplementedException();
+            string info = $"Справка по команде \"{message.Body}\":\n\n" +
+
+                $"Команда создаёт анонимный чат из не более, чем {countOfUsers} пользователей, не считая создателя.\n" +
+                $"Имена всех пользователей в чате будут скрыты и заменены на \"1 аноним\", \"2 аноним\" и тд.\n\n" +
+                "Для того, чтобы создать анонимный чат, укажите в параметрах название чата в кавычках (\" \") и ссылки на пользователей. Все параметры отделяются запятыми.\n" +
+                $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(\"Тестовый чат\", https://vk.com/id1, https://vk.com/hello_bot) - если операция пройдёт успешно, создаётся чат \"Тестовый чат\", в который можно отправлять сообщения.\n\n" +
+                $"Для того, чтобы посмотреть список анонимных чатов, в которых вы состоите - напишите {BOT_API.platformSett.BotName[0]}, мои чаты - в данном примере бот выведет:\n" +
+                $"Список чатов:\n1) \"Тестовый чат\"\n\n" +
+                $"Для того, чтобы отправить сообщение в чат, напишите {BOT_API.platformSett.BotName[0]}, анонимно(название чата в кавычках, текст сообщения)\n" +
+                $"Пример: {BOT_API.platformSett.BotName[0]}, анонимно(\"Тестовый чат\", всем приветик)\n" +
+                $"Данное сообщение отправится всем участникам этого чата (каждому пользователю будет указано, из какого чата пришло сообщение)\n\n" +
+                $"Для того, чтобы отправить аудиосообщение в чат, напишите { BOT_API.platformSett.BotName[0]}, анонимно(название чата в кавычках, !текст сообщения) - поставьте ! перед текстом сообщения.\n" +
+                $"Пример: {BOT_API.platformSett.BotName[0]}, анонимно(\"Тестовый чат\", !всем приветик)\n\n" +
+                $"ВНИМАНИЕ! Если сообщение было успешно доставлено, бот ответит вам \"Доставлено!\"";
+                
+            
+            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            {
+                Functions.SendMessage(message, info, message.ChatId != null);
+                return true;
+            }
+            return false;
         }
     }
 }
