@@ -13,6 +13,7 @@ using WaveLib;
 using Yeti.Lame;
 using Yeti.MMedia.Mp3;
 using System.IO;
+using MyFunctions.Exceptions;
 
 namespace MyFunctions
 {
@@ -34,10 +35,14 @@ namespace MyFunctions
         public static void Speech(Message message, params object[] p)
         {
             if (NeedCommandInfo1(message, p)) return;
-            Functions.SendMessage(message, MakeSpeechAttachment(p[0].ToString()),"", message.ChatId != null);
+
+            MessagesSendParams param = MakeSpeechAttachment(Functions.RemoveSpaces(p[0].ToString()), message);
+
+            Functions.SendMessage(message, param,"", message.ChatId != null);
+
         }
 
-        public static MessagesSendParams MakeSpeechAttachment(string text)
+        public static MessagesSendParams MakeSpeechAttachment(string text, Message message)
         {
             SpeechSynthesizer speechSynth = new SpeechSynthesizer(); // создаём объект
             speechSynth.Volume = 100; // устанавливаем уровень звука
@@ -46,8 +51,19 @@ namespace MyFunctions
             speechSynth.SetOutputToWaveFile(FILENAME,
                                         new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
             //speechSynth.SelectVoice("Microsoft Pavel Mobile");
-
-            speechSynth.Speak(text + ENDING); // озвучиваем переданный текст
+            if (text[0] != '@')
+                speechSynth.Speak(text + ENDING); // озвучиваем переданный текст
+            else
+            {
+                if(text.Length - 1 <= 12)
+                {
+                    //Functions.SendMessage(message, "Текст аудиосообщения слишком короткий!" , message.ChatId != null);
+                    //return default(MessagesSendParams);
+                    throw new WrongParamsException("Текст аудиосообщения слишком короткий!");
+                }
+                text = text.Substring(1);
+                speechSynth.Speak(text);
+            }
             speechSynth.SetOutputToNull();
 
             ConverWavToMp3();

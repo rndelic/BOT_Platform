@@ -22,8 +22,8 @@ namespace MyFunctions
                 Functions.SendMessage(message, "Лови, Тучка, 100000$ 💰😉👌", message.ChatId != null);
             else 
             {
-                //Functions.SendMessage(message, "Ты не Тучка ;/ Скорее всего, ты Кверти, ко-ко-ко.", message.ChatId != null);
-                //SpeechText.Speech(message, "Кверти-петух, ко-ко-ко");
+                Functions.SendMessage(message, "Ты не Тучка ;/ Скорее всего, ты Кверти, ко-ко-ко.", message.ChatId != null);
+                SpeechText.Speech(message, "Кверти-петух, ко-ко-ко");
             }
         }
 

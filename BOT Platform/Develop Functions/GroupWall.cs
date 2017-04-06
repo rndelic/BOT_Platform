@@ -21,6 +21,7 @@ namespace MyFunctions
 
         void Find(Message message, params object[] p)
         {
+            if (NeedCommandInfo(message, p)) return;
             #region
             string[] param = p[0].ToString().Split(new char[1] { ',' }, 2, StringSplitOptions.None);
 
@@ -73,7 +74,15 @@ namespace MyFunctions
 
         public bool NeedCommandInfo(Message message, params object[] p)
         {
-            throw new NotImplementedException();
+            string info = info = $"Справка для команды \"{message.Body}\" отсутствует. Обратитесь к разработчику: https://vk.com/dedsec_alexberezhnyh";
+
+
+            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            {
+                Functions.SendMessage(message, info, message.ChatId != null);
+                return true;
+            }
+            return false;
         }
 
         public GroupWall()

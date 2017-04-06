@@ -110,6 +110,7 @@
     <Compile Include="Develop Functions\GroupWall.cs" />
     <Compile Include="Develop Functions\EasterEggs.cs" />
     <Compile Include="Kernel\CommandsList.cs" />
+    <Compile Include="Kernel\Exceptions\WrongParamsException.cs" />
     <Compile Include="Kernel\Interfaces\Functions.cs" />
     <Compile Include="Kernel\Interfaces\IMyCommands.cs" />
     <Compile Include="Kernel\Interfaces\Mail.cs" />

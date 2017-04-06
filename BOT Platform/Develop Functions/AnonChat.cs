@@ -180,7 +180,7 @@ namespace MyFunctions
 
             MessagesSendParams sendParams = new MessagesSendParams();
 
-            if (mesBody[0] == '!') sendParams = SpeechText.MakeSpeechAttachment(mesBody.Substring(1));
+            if (mesBody[0] == '!') sendParams = SpeechText.MakeSpeechAttachment(mesBody.Substring(1), message);
             KeyValuePair<long, uint>[] usersId = Chats[chatTitle].usersId.Where(t => t.Key != message.UserId.Value).ToArray();
             for (int i = 0; i < usersId.Length; i++)
             {

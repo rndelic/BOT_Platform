@@ -23,7 +23,7 @@ namespace MyFunctions
         {
             CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
         }
-
+        //ADD MNJ
         private void MakeMem(Message message, object[] p)
         {
             if (NeedCommandInfo(message, p)) return;
@@ -64,7 +64,7 @@ namespace MyFunctions
 
                     webClient.Dispose();
                     DrawAndSave(text);
-                    photoList.Add(SavePhoto());
+                    photoList.Add(Functions.UploadImageInMessage(OUT_FILENAME));
 
                     Upload(message, photoList);
 
@@ -72,13 +72,12 @@ namespace MyFunctions
                     File.Delete(IN_FILENAME);
         }
 
-        void DrawAndSave(string[] text)
+        void DrawAndSave(string[] text, float mlp = 1.2f)
         {
             Image image = Image.FromFile(IN_FILENAME);
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             const string FONT_NAME = "Arial Black";
-            const float mlp = 1f;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -182,16 +181,6 @@ namespace MyFunctions
             graphics.Dispose();
             image.Save(OUT_FILENAME);
             image.Dispose();
-        }
-
-        Photo SavePhoto()
-        {
-            var uploadServer = BOT_API.app.Photo.GetMessagesUploadServer();
-            // Загрузить фотографию.
-            var wc = new WebClient();
-            var responseImg = Encoding.ASCII.GetString(wc.UploadFile(uploadServer.UploadUrl, OUT_FILENAME));
-            // Сохранить загруженную фотографию
-            return BOT_API.app.Photo.SaveMessagesPhoto(responseImg)[0];
         }
         void Upload(Message message, List<Photo> photoList)
         {

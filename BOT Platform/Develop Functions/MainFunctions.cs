@@ -126,7 +126,16 @@ namespace MyFunctions
         void Say(Message message, params object[] p)
         {
             if (NeedCommandInfo(message, p)) return;
-            Functions.SendMessage(message, p[0].ToString(), message.ChatId != null);
+            string text = Functions.RemoveSpaces(p[0].ToString());
+            if (text[0] == '!' && text.Length >= 2)
+            {
+                string textToSpeech = text.Substring(1);
+                if(!String.IsNullOrWhiteSpace(textToSpeech))
+                    SpeechText.Speech(message, textToSpeech);
+
+                else Functions.SendMessage(message, text, message.ChatId != null);
+            }
+            else Functions.SendMessage(message, text, message.ChatId != null);
         }
 
         void AnonimSend(Message message, params object[] p)
@@ -181,7 +190,7 @@ namespace MyFunctions
                 
                 else
                 {
-                    Functions.SendMessage(message, SpeechText.MakeSpeechAttachment(param[1].Substring(1)),
+                    Functions.SendMessage(message, SpeechText.MakeSpeechAttachment(param[1].Substring(1), message),
                         "Служба анонимной почты, вам аудиосообщение:\n");
                 }   
             }
@@ -507,12 +516,7 @@ namespace MyFunctions
             string info = "";
             switch (message.Body)
             {
-                case "анонимно":/*
-                    result =
-                        $"Справка по команде \"{message.Body}\":\n\n" +
-               "Бот отправляет указаннму в скобках человеку или чату анонимное сообщение или аудиосообщение. Ваше имя отображаться не будет.\n\n" +
-               "Для того, чтобы отправить сообщение"
-              */
+                case "анонимно":
                     info =
                     $"Справка по команде \"{message.Body}\":\n\n" +
                     "Команда отправляет пользователю анонимное сообщение, где не будет указано, от кого оно.\n\n" +
@@ -534,9 +538,9 @@ namespace MyFunctions
                     $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}( ((25/5) - 3) *2) )\n" +
                     $"Пользователь получит ответ: 4\n\n" +
                     "Обратите внимание, вне зависимости от того, есть ли в выражении свои скобки или нет  (25/5) - 3) * 2, всё выражение должно быть указано в главных скобках:  ((25/5) - 3) * 2)";
-
-
                     break;
+                default:
+                    info = $"Справка для команды \"{message.Body}\" отсутствует. Обратитесь к разработчику: https://vk.com/dedsec_alexberezhnyh";
                     break;
             }
             if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))

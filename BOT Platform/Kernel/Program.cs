@@ -215,7 +215,7 @@ namespace BOT_Platform
                 else param = param.Remove(ind);
             }
             if (message.ChatId != null || (botNameIndex >= 0 && botNameIndex < command.Length))
-                command = command.Substring(botNameIndex + botName.Length + 1);
+                command = command.Substring(botNameIndex + botName.Length + (1));
 
             Functions.RemoveSpaces(ref command);
 
@@ -234,7 +234,7 @@ namespace BOT_Platform
                         return platformSett.BotName[y];
                     }
                 }
-            return "[NOT_FOUND]";
+                return "[NOT_FOUND]";
         }
 
         static string FindBotNameInMessage(string message)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyFunctions.Exceptions;
+using System;
 using System.Collections.Generic;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
@@ -122,11 +123,20 @@ namespace BOT_Platform
                 {
                   commandList[message.Body].Function(message, obj);
                 }
-
+                catch (WrongParamsException ex)
+                {
+                    Console.WriteLine("---------------------------------------------------------------------");
+                    Console.WriteLine("[ERROR] \"" + message.Body + "\"\n" + ex.Message + "\n");
+                    Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
+                    Console.WriteLine("---------------------------------------------------------------------");
+                    SendMessage(message, ex.Message + "\n\n" +
+                                         $"Для получения справки по команде напишите {BOT_API.platformSett.BotName[0]}, {message.Body}",
+                                         message.ChatId != null);
+                }
                 catch (Exception ex)
                 {
                     Console.WriteLine("---------------------------------------------------------------------");
-                    Console.WriteLine("[ERROR] \""+ message.Body+"\"\n" + ex.Message);
+                    Console.WriteLine("[ERROR] \""+ message.Body+"\"\n" + ex.Message + "\n");
                     Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
                     Console.WriteLine("---------------------------------------------------------------------");
                     SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +

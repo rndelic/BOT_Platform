@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -168,6 +169,16 @@ namespace BOT_Platform
                  .Replace("\\", "%26%23092%3B")
                  .Replace(",", "%2C")
                  .Replace("/", "%2F");
+        }
+
+        public static Photo UploadImageInMessage(string photoName)
+        {
+            var uploadServer = BOT_API.app.Photo.GetMessagesUploadServer();
+            // Загрузить фотографию.
+            var wc = new WebClient();
+            var responseImg = Encoding.ASCII.GetString(wc.UploadFile(uploadServer.UploadUrl, photoName));
+            // Сохранить загруженную фотографию
+            return BOT_API.app.Photo.SaveMessagesPhoto(responseImg)[0];
         }
     }
 }
