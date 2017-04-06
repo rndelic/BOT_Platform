@@ -67,14 +67,14 @@ namespace BOT_Platform
                 Console.WriteLine("---------------------------------------------------------------------");
                 Console.WriteLine("[ERROR] Пользователь " + id + " уже был забанен");
                 Console.WriteLine("---------------------------------------------------------------------");
-                SendMessage(message, "[ERROR] Пользователь " + id + " уже был забанен",
+                Functions.SendMessage(message, "[ERROR] Пользователь " + id + " уже был забанен",
                                       message.ChatId != null);
             }
 
             else
             {
                 banList.Add(id, description);
-                SendMessage(message, "Пользователь " + id + " ЗАбанен!",
+                Functions.SendMessage(message, "Пользователь " + id + " ЗАбанен!",
                                       message.ChatId != null);
             }
         }
@@ -83,7 +83,7 @@ namespace BOT_Platform
             if (banList.ContainsKey(id))
             {
                 banList.Remove(id);
-                SendMessage(message, "Пользователь " + id + " был РАЗбанен!",
+                Functions.SendMessage(message, "Пользователь " + id + " был РАЗбанен!",
                                       message.ChatId != null);
             }
 
@@ -92,7 +92,7 @@ namespace BOT_Platform
                 Console.WriteLine("---------------------------------------------------------------------");
                 Console.WriteLine("[ERROR] Пользователь " + id + " не был забанен");
                 Console.WriteLine("---------------------------------------------------------------------");
-                SendMessage(message, "[ERROR] Пользователь " + id + " не был забанен",
+                Functions.SendMessage(message, "[ERROR] Пользователь " + id + " не был забанен",
                                       message.ChatId != null);
             }
         }
@@ -113,7 +113,7 @@ namespace BOT_Platform
         {
             if (banList.ContainsKey(message.UserId.ToString()))
             {
-                SendMessage(message, banList[message.UserId.ToString()],
+                Functions.SendMessage(message, banList[message.UserId.ToString()],
                                           message.ChatId != null);
                 return;
             }
@@ -125,21 +125,15 @@ namespace BOT_Platform
                 }
                 catch (WrongParamsException ex)
                 {
-                    Console.WriteLine("---------------------------------------------------------------------");
-                    Console.WriteLine("[ERROR] \"" + message.Body + "\"\n" + ex.Message + "\n");
-                    Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
-                    Console.WriteLine("---------------------------------------------------------------------");
-                    SendMessage(message, ex.Message + "\n\n" +
+                    ErrorInfoToConsole(message.Body, ex);
+                    Functions.SendMessage(message, ex.Message + "\n\n" +
                                          $"Для получения справки по команде напишите {BOT_API.platformSett.BotName[0]}, {message.Body}",
                                          message.ChatId != null);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("---------------------------------------------------------------------");
-                    Console.WriteLine("[ERROR] \""+ message.Body+"\"\n" + ex.Message + "\n");
-                    Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
-                    Console.WriteLine("---------------------------------------------------------------------");
-                    SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
+                    ErrorInfoToConsole(message.Body, ex);
+                    Functions.SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
                                          "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.platformSett.BotName[0] + ", команды) " +
                                          "или повторите запрос позже.\n\n" +
 
@@ -150,27 +144,11 @@ namespace BOT_Platform
 
             else
             {
-              if(message.UserId != BOT_API.app.UserId)  SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
+              if(message.UserId != BOT_API.app.UserId)
+                    Functions.SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
                                     "или воспользуйтесь командой " + BOT_API.platformSett.BotName[0] + ", команды.",
                                     message.ChatId != null);
             }
-        }
-
-        static void SendMessage(Message m, string message, bool isChat = false)
-        {
-            MessagesSendParams msp = new MessagesSendParams()
-            {
-                Message = message,
-            };
-
-            if (isChat == true)
-            {
-                msp.ChatId = m.ChatId;
-                msp.ForwardMessages = new long[1] { m.Id.Value };
-            }
-            else msp.UserId = m.UserId;
-
-            BOT_API.app.Messages.Send(msp);
         }
     
         internal static void TryAddCommand(string command, MyComandStruct mcs)
@@ -200,6 +178,14 @@ namespace BOT_Platform
                 }
 
             return list;
+        }
+
+        static void ErrorInfoToConsole(string command, Exception ex)
+        {
+            Console.WriteLine("---------------------------------------------------------------------");
+            Console.WriteLine($"[ERROR {DateTime.Now.ToLongTimeString()}] \"" + command + "\"\n" + ex.Message + "\n");
+            Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
+            Console.WriteLine("---------------------------------------------------------------------");
         }
     }
 }

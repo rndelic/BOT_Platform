@@ -36,7 +36,7 @@ namespace MyFunctions
         {
             if (NeedCommandInfo1(message, p)) return;
 
-            MessagesSendParams param = MakeSpeechAttachment(Functions.RemoveSpaces(p[0].ToString()), message);
+            MessagesSendParams param = MakeSpeechAttachment(p[0].ToString(), message);
 
             Functions.SendMessage(message, param,"", message.ChatId != null);
 
@@ -47,10 +47,11 @@ namespace MyFunctions
             SpeechSynthesizer speechSynth = new SpeechSynthesizer(); // создаём объект
             speechSynth.Volume = 100; // устанавливаем уровень звука
             speechSynth.Rate = 2;
-
+            //speechSynth.SelectVoice("Microsoft Pavel Mobile");
+            Functions.RemoveSpaces(ref text);
             speechSynth.SetOutputToWaveFile(FILENAME,
                                         new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
-            //speechSynth.SelectVoice("Microsoft Pavel Mobile");
+
             if (text[0] != '@')
                 speechSynth.Speak(text + ENDING); // озвучиваем переданный текст
             else
@@ -59,6 +60,7 @@ namespace MyFunctions
                 {
                     //Functions.SendMessage(message, "Текст аудиосообщения слишком короткий!" , message.ChatId != null);
                     //return default(MessagesSendParams);
+                    speechSynth.SetOutputToNull();
                     throw new WrongParamsException("Текст аудиосообщения слишком короткий!");
                 }
                 text = text.Substring(1);
