@@ -7,7 +7,7 @@ using VkNet.Model.RequestParams;
 
 namespace BOT_Platform
 {
-    class StandartCommands : IMyCommands
+    class StandartCommands
     {
         public void AddMyCommandInPlatform()
         {
@@ -60,12 +60,13 @@ namespace BOT_Platform
         }
         void CRestart(Message message, params object[] p)
         {
+            Thread needToAbortThread = BOT_API.consoleThread;
             BOT_API.consoleThread = new Thread(BOT_API.ConsoleCommander)
             {
                 Priority = ThreadPriority.Highest
             };
             BOT_API.consoleThread.Start();
-            Thread.CurrentThread.Abort("Платформа была перезапущена!");
+            needToAbortThread.Abort("Платформа была перезапущена!");
             
         }
         void CTest(Message message, params object[] p)
@@ -110,9 +111,5 @@ namespace BOT_Platform
             Functions.SendMessage(message, sb.ToString(), message.ChatId != null);
         }
 
-        public bool NeedCommandInfo(Message message, params object[] p)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
