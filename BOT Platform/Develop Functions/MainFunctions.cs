@@ -8,6 +8,7 @@ using VkNet.Model.RequestParams;
 using BOT_Platform;
 using System.Text.RegularExpressions;
 using VkNet.Enums.SafetyEnums;
+using BOT_Platform.Interfaces;
 
 namespace MyFunctions
 {

@@ -4,6 +4,7 @@ using System.Text;
 using VkNet.Model;
 using System.Threading;
 using VkNet.Model.RequestParams;
+using BOT_Platform.Interfaces;
 
 namespace BOT_Platform
 {
@@ -43,8 +44,12 @@ namespace BOT_Platform
             else if (message.Body == "undebug")
             {
                 BOT_API.platformSett.IsDebug = false;
-                if(BOT_API.botThread != null)
+                if (BOT_API.botThread != null)
+                {
+
                     BOT_API.botThread.Abort("Перезапуск потока botThread");
+                    Console.WriteLine("Перезапуск потока botThread");
+                }
 
                 BOT_API.botThread = new Thread(BOT_API.BotWork)
                 {
@@ -66,7 +71,7 @@ namespace BOT_Platform
                 Priority = ThreadPriority.Highest
             };
             BOT_API.consoleThread.Start();
-            needToAbortThread.Abort("Платформа была перезапущена!");
+            if(needToAbortThread != null) needToAbortThread.Abort("Платформа была перезапущена!");
             
         }
         void CTest(Message message, params object[] p)
@@ -91,7 +96,6 @@ namespace BOT_Platform
         }
         void CExit(Message message, params object[] p)
         {
-            //ADD
             Environment.Exit(1);
         }
         void ClearConsole(Message message, params object[] p)

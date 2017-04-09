@@ -7,21 +7,21 @@ using System.Linq;
 using VkNet.Model;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
-
+using BOT_Platform.Interfaces;
 
 namespace BOT_Platform
 {
     static partial class BOT_API
     {
-        static volatile string DATA_FILENAME = "Data\\data.ini"; /* Файл с настройками. 
-                                                            * Распологается в одной папке с исполняемым файлом
-                                                            */
-        internal static volatile VkApi app = new VkApi();  /* Обьект самого приложения VK.NET */
-        internal volatile static PlatformSettings platformSett;     /* Здесь хранятся все настройки бота */
+        static volatile string DATA_FILENAME = "Data\\BotData\\data.ini"; /* Файл с настройками. 
+                                                                           * Распологается в одной папке с исполняемым файлом
+                                                                           */
+        internal static volatile VkApi app = new VkApi();       /* Обьект самого приложения VK.NET */
+        internal volatile static PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
 
-        const string DevNamespace = "MyFunctions";         /* Пространоство имён, содержащее только
-                                                            * пользовательские функции
-                                                            */
+        const string DevNamespace = "MyFunctions";   /* Пространоство имён, содержащее только
+                                                      * пользовательские функции
+                                                      */
 
         internal static Thread botThread;
         internal static Thread consoleThread;
@@ -32,13 +32,11 @@ namespace BOT_Platform
         public static void Main()
         {
             Console.WriteLine("[Инициализация консоли...]");
+            /* Подключаем стандартный модуль с базовыми командами */
+            StandartCommands sC = new StandartCommands();
 
             /* Запускаем обратчик команд */
-            consoleThread = new Thread(ConsoleCommander)
-            {
-                Priority = ThreadPriority.Highest
-            };
-            consoleThread.Start();
+            CommandsList.ConsoleCommand("restart");
         }
 
         public static event EventHandler ClearCommands;
@@ -51,7 +49,7 @@ namespace BOT_Platform
             Console.WriteLine("[Загружаются параметры платформы...]");
             platformSett = new PlatformSettings(DATA_FILENAME);
 
-            CommandsList.ConsoleCommand("заглушка"); //заглушка
+            CommandsList.ConsoleCommand("start"); //заглушка
             ClearCommands.Invoke(new object(), null);
             Thread.Sleep(200);
             /* Подключаем модули */
@@ -59,8 +57,6 @@ namespace BOT_Platform
 
             /* Создаём поток обработки ботом поступающих сообщений */
             CommandsList.ConsoleCommand("undebug");
-            //Thread.CurrentThread.Join(3000);
-
             /* Обрабатываем команды, поступающие в консоль */
             while (true)
             {
@@ -174,6 +170,7 @@ namespace BOT_Platform
 
                 string temp = messages.Messages[i].Body;
                 messages.Messages[i].Body = comInfo.command;
+                messages.Messages[i].Title = temp;
                 CommandsList.TryCommand(messages.Messages[i],
                                         comInfo.param);
                 messages.Messages[i].Body = temp;
@@ -257,9 +254,6 @@ namespace BOT_Platform
         static void ExecuteModules()
         {
             Console.WriteLine("[Подключение модулей...]");
-
-            /* Подключаем стандартный модуль с базовыми командами */
-            StandartCommands sC = new StandartCommands();
 
             /* Подключаем модули, создавая обьекты их классов */
             Type[] typelist = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == DevNamespace).ToArray();

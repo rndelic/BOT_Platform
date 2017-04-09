@@ -9,7 +9,7 @@ using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
 
-namespace BOT_Platform
+namespace BOT_Platform.Interfaces
 {
     static class Functions
     {
@@ -77,7 +77,7 @@ namespace BOT_Platform
             else Console.WriteLine(msp.Message);
         }
 
-        public static bool ContainsMessage(Message containMes, List<Message> Messages)
+        public static bool ContainsMessage(Message containMes, IEnumerable<Message> Messages)
         {
             bool contains = false;
             foreach (Message m in Messages)

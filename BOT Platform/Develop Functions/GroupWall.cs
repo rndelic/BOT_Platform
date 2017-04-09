@@ -7,6 +7,7 @@ using BOT_Platform;
 using VkNet.Model;
 using System.IO;
 using VkNet.Model.RequestParams;
+using BOT_Platform.Interfaces;
 
 namespace MyFunctions
 {
@@ -74,8 +75,13 @@ namespace MyFunctions
 
         public bool NeedCommandInfo(Message message, params object[] p)
         {
-            string info = info = $"Справка для команды \"{message.Body}\" отсутствует. Обратитесь к разработчику: https://vk.com/dedsec_alexberezhnyh";
+            string info = info =
+                $"Справка по команде \"{message.Body}\":\n\n" +
+               "Бот ищет в группе, указанной в скобках (ссылке на группу), все посты, содержащие заданными ключевые слова/словосочетания/предложения.\n\n" +
 
+               $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(https://vk.com/panda.panda, красные панды) - " +
+               $"бот отправит ссылку на все посты, где упоминается \"красные панды\".\n" +
+               $"Пример ответа для данного запроса:\n[https://vk.com/wall-29439161?owners_only=1&q=%20%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D1%8B%D0%B5%20%D0%BF%D0%B0%D0%BD%D0%B4%D1%8B]";
 
             if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
             {

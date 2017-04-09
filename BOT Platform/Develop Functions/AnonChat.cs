@@ -10,7 +10,7 @@ using System.Threading;
 using BOT_Platform;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
-
+using BOT_Platform.Interfaces;
 
 namespace MyFunctions
 {

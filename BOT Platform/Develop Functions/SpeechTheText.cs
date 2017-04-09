@@ -14,6 +14,7 @@ using Yeti.Lame;
 using Yeti.MMedia.Mp3;
 using System.IO;
 using MyFunctions.Exceptions;
+using BOT_Platform.Interfaces;
 
 namespace MyFunctions
 {
@@ -21,14 +22,13 @@ namespace MyFunctions
     {
         const string FILENAME    = "file.wav";
         const string FILENAMEMP3 = "file.mp3";
-        public const string NAME        = "mmBOT";
+        public const string NAME = "mmBOT";
 
         const string ENDING = ". ахахах этот бот лучше всех";
 
         public void AddMyCommandInPlatform()
         { 
             CommandsList.TryAddCommand("произнеси", new MyComandStruct("Возвращает аудиозапись с озвученным текстом", Speech));
-
         }
 
         

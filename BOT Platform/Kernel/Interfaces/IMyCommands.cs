@@ -1,6 +1,6 @@
 ﻿using VkNet.Model;
 
-namespace BOT_Platform
+namespace BOT_Platform.Interfaces
 {
     interface IMyCommands
     {

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BOT_Platform;
 using VkNet.Model;
+using BOT_Platform.Interfaces;
 
 namespace MyFunctions
 {

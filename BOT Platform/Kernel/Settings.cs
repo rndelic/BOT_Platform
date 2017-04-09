@@ -61,7 +61,7 @@ namespace BOT_Platform
                     }
                 }
 
-                dataLine.Replace("[SPACE]", " ");
+                //dataLine.Replace("[SPACE]", " ");
 
                 string[] splitSettings = {
                     "[LOGIN]","[PASSWORD]","[APP_ID]","[REGEX]","[PAUSE]",
@@ -91,8 +91,6 @@ namespace BOT_Platform
                 this.botName                 = appParams[7].Split(',');
                 this.mesRemeberCount         = Convert.ToInt16(appParams[8]);
                 this.IsDebug                 = true; 
-                //if (!Autorize(param)) throw new Exception("Возникла ошибка с авторизацией бота:\n" +
-                //                                          "неверный логин или пароль.\n");
             }
 
             catch (Exception ex)

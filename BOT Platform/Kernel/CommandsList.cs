@@ -1,4 +1,5 @@
-﻿using MyFunctions.Exceptions;
+﻿using BOT_Platform.Interfaces;
+using MyFunctions.Exceptions;
 using System;
 using System.Collections.Generic;
 using VkNet.Model;
@@ -36,13 +37,13 @@ namespace BOT_Platform
         }
     }
 
-    public static class CommandsList
+    public static partial class CommandsList
     {
 
-        static CommandsList()
-        {
-            BOT_API.ClearCommands += BOT_API_ClearCommands;
-        }
+            static CommandsList()
+            {
+                BOT_API.ClearCommands += BOT_API_ClearCommands;
+            }
 
         public delegate void Function(Message message, params object[] p);
 
@@ -123,16 +124,16 @@ namespace BOT_Platform
                 {
                   commandList[message.Body].Function(message, obj);
                 }
-                catch (WrongParamsException ex)
+                catch (BotPlatformException ex)
                 {
-                    ErrorInfoToConsole(message.Body, ex);
+                    WriteErrorInfo(message.Title, ex);
                     Functions.SendMessage(message, ex.Message + "\n\n" +
                                          $"Для получения справки по команде напишите {BOT_API.platformSett.BotName[0]}, {message.Body}",
                                          message.ChatId != null);
                 }
                 catch (Exception ex)
                 {
-                    ErrorInfoToConsole(message.Body, ex);
+                    WriteErrorInfo(message.Title, ex);
                     Functions.SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
                                          "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.platformSett.BotName[0] + ", команды) " +
                                          "или повторите запрос позже.\n\n" +
@@ -180,12 +181,16 @@ namespace BOT_Platform
             return list;
         }
 
-        static void ErrorInfoToConsole(string command, Exception ex)
+        static void WriteErrorInfo(string command, Exception ex)
         {
-            Console.WriteLine("---------------------------------------------------------------------");
-            Console.WriteLine($"[ERROR {DateTime.Now.ToLongTimeString()}] \"" + command + "\"\n" + ex.Message + "\n");
-            Console.WriteLine("[STACK_TRACE] " + ex.StackTrace);
-            Console.WriteLine("---------------------------------------------------------------------");
+            string text = "---------------------------------------------------------------------\n" +
+                          $"[ERROR { DateTime.Now.ToLongTimeString()}] \"" + command + "\"\n" + ex.Message + "\n" +
+                          "[STACK_TRACE] " + ex.StackTrace + "\n" +
+                          "---------------------------------------------------------------------\n";
+            Console.WriteLine(text);
+
+            Log log = new Log();
+            log.WriteLog(text);
         }
     }
 }

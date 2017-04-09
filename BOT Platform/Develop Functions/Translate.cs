@@ -11,6 +11,7 @@ using VkNet.Model.RequestParams;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using VkNet.Model.Attachments;
+using BOT_Platform.Interfaces;
 
 namespace MyFunctions
 {
