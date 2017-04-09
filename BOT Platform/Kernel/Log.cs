@@ -10,9 +10,9 @@ namespace BOT_Platform
 {
     public static partial class CommandsList
     {
-        class Log
+        public class Log
         {
-            static string logFile = "Data\\BotData\\log.txt";
+            public static string logFile = "Data\\BotData\\log.txt";
             Thread writeThread;
             object lockObj = new object();
             void InLog(object text)

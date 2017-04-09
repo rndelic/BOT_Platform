@@ -13,16 +13,12 @@ namespace BOT_Platform
 {
     static partial class BOT_API
     {
-        static volatile string DATA_FILENAME = "Data\\BotData\\data.ini"; /* Файл с настройками. 
-                                                                           * Распологается в одной папке с исполняемым файлом
-                                                                           */
         internal static volatile VkApi app = new VkApi();       /* Обьект самого приложения VK.NET */
         internal volatile static PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
 
         const string DevNamespace = "MyFunctions";   /* Пространоство имён, содержащее только
                                                       * пользовательские функции
                                                       */
-
         internal static Thread botThread;
         internal static Thread consoleThread;
 
@@ -47,7 +43,7 @@ namespace BOT_Platform
         {
             /* Считываем настройки бота из файла настроек */
             Console.WriteLine("[Загружаются параметры платформы...]");
-            platformSett = new PlatformSettings(DATA_FILENAME);
+            platformSett = new PlatformSettings();
 
             CommandsList.ConsoleCommand("start"); //заглушка
             ClearCommands.Invoke(new object(), null);

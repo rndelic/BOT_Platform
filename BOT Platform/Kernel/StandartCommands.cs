@@ -5,6 +5,7 @@ using VkNet.Model;
 using System.Threading;
 using VkNet.Model.RequestParams;
 using BOT_Platform.Interfaces;
+using System.Diagnostics;
 
 namespace BOT_Platform
 {
@@ -15,13 +16,22 @@ namespace BOT_Platform
             CommandsList.AddConsoleCommand("help", new MyComandStruct("Показывает список всех комманд",CShowCommands));
             CommandsList.AddConsoleCommand("exit", new MyComandStruct("Закрыть приложение", CExit));
             CommandsList.AddConsoleCommand("cls" , new MyComandStruct("Очистить консоль", ClearConsole));
+            CommandsList.AddConsoleCommand("log", new MyComandStruct("Открывает лог", СLog));
+            CommandsList.AddConsoleCommand("settings", new MyComandStruct("Открывает файл настроек", CSettings));
             CommandsList.AddConsoleCommand("test", new MyComandStruct("Тест бота", CTest));
             CommandsList.AddConsoleCommand("restart", new MyComandStruct("Перезапуск системы", CRestart));
             CommandsList.AddConsoleCommand("debug", new MyComandStruct("Активирует режим отладки", CDebug));
             CommandsList.AddConsoleCommand("undebug", new MyComandStruct("Деактивирует режим отладки", CDebug));
+        }
 
+        private void CSettings(Message message, object[] p)
+        {
+            Process.Start(PlatformSettings.DATA_FILENAME);
+        }
 
-            CommandsList.TryAddCommand("команды", new MyComandStruct("Показывает список всех команд", ShowCommands));
+        private void СLog(Message message, object[] p)
+        {
+            Process.Start(CommandsList.Log.logFile);
         }
 
         public StandartCommands()
@@ -101,18 +111,6 @@ namespace BOT_Platform
         void ClearConsole(Message message, params object[] p)
         {
             Console.Clear();
-        }
-        void ShowCommands(Message message, params object[] p)
-        {
-            List<string> com = CommandsList.GetCommandList(true);
-            StringBuilder sb = new StringBuilder(); 
-            sb.Append("Список команд:\n");
-            foreach (string value in com)
-            {
-                sb.Append(BOT_API.platformSett.BotName[0] + ", " + value + "\n");
-            }
-
-            Functions.SendMessage(message, sb.ToString(), message.ChatId != null);
         }
 
     }

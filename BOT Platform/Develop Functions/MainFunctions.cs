@@ -20,6 +20,8 @@ namespace MyFunctions
                                        "анонимно(id получателя или ссылка, текст сообщения)", AnonimSend));
             CommandsList.TryAddCommand("скажи", new MyComandStruct(
                                        "скажи(текст сообщения).", Say));
+            CommandsList.TryAddCommand("команды", new MyComandStruct(
+                                       "Показывает список всех команд", ShowCommands));
 
             CommandsList.TryAddCommand("рандом", new MyComandStruct(
                                        "рандом, или рандом(макс знач.), или рандом(мин,макс)", BRandom));
@@ -36,6 +38,18 @@ namespace MyFunctions
         public MainFunctions()
         {
             AddMyCommandInPlatform();
+        }
+        void ShowCommands(Message message, params object[] p)
+        {
+            List<string> com = CommandsList.GetCommandList(true);
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Список команд:\n");
+            foreach (string value in com)
+            {
+                sb.Append(BOT_API.platformSett.BotName[0] + ", " + value + "\n");
+            }
+
+            Functions.SendMessage(message, sb.ToString(), message.ChatId != null);
         }
         void Solve(Message message, params object[] p)
         {

@@ -11,7 +11,7 @@ using VkNet.Model.RequestParams;
 
 namespace BOT_Platform
 {
-    class PlatformSettings
+    public class PlatformSettings
     {
         const char COMMENTS   = '$';
 
@@ -23,9 +23,13 @@ namespace BOT_Platform
         Int16             mesRemeberCount;
         Int16             delay;
 
-        public PlatformSettings(string filename)
+        public static string DATA_FILENAME = "Data\\BotData\\data.ini"; /* Файл с настройками. 
+                                                                           * Распологается в одной папке с исполняемым файлом
+                                                                           */
+
+        public PlatformSettings()
         {
-            FileInfo data = new FileInfo(filename);
+            FileInfo data = new FileInfo(DATA_FILENAME);
             try
             {
                 if (!data.Exists) throw new FileLoadException("Отсутствует файл настроек!", "Ошибка");
