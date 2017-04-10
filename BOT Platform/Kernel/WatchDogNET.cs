@@ -26,7 +26,6 @@ namespace BOT_Platform
             {
                 Console.WriteLine("[NET_ERROR " + DateTime.Now.ToLongTimeString() + "] Не удалось подключиться к vk.com: " + status.ToString() + "\n");
                 return false;
-
             }
             else
             {

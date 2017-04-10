@@ -25,7 +25,6 @@ namespace BOT_Platform
                     }
                 }
             }
-
             public Log()
             {
                 writeThread = new Thread(new ParameterizedThreadStart(InLog));
