@@ -11,7 +11,6 @@ namespace BOT_Platform
     {
         readonly string description;
         readonly CommandsList.Function MyFunction;
-
         public string Description
         {
             get
@@ -162,7 +161,7 @@ namespace BOT_Platform
                                    "Команда уже определена.\n");
         }
 
-        //МОЖНО ВЫНЕСТИ В CONST STRING
+        //TODO: МОЖНО ВЫНЕСТИ В CONST STRING
         internal static List<string> GetCommandList(bool isBotCommands = false)
         {
             List<string> list = new List<string>();

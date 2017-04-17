@@ -27,7 +27,6 @@ namespace BOT_Platform.Interfaces
             if (j != str.Length - 1) str = str.Remove(j + 1);
 
         }
-
         public static string RemoveSpaces(string str)
         {
             //удаляем пробелы с начала
@@ -43,7 +42,6 @@ namespace BOT_Platform.Interfaces
 
             return str;
         }
-
         public static void SendMessage(Message message, MessagesSendParams m, string body, bool isChat = false)
         {
             m.Message = body;
@@ -57,7 +55,6 @@ namespace BOT_Platform.Interfaces
             if (BOT_API.platformSett.IsDebug == false) BOT_API.app.Messages.Send(m);
             else Console.WriteLine(m.Message);
         }
-
         public static void SendMessage(Message m, string message, bool isChat = false)
         {
             MessagesSendParams msp = new MessagesSendParams()
@@ -76,7 +73,6 @@ namespace BOT_Platform.Interfaces
             if (BOT_API.platformSett.IsDebug == false) BOT_API.app.Messages.Send(msp);
             else Console.WriteLine(msp.Message);
         }
-
         public static bool ContainsMessage(Message containMes, IEnumerable<Message> Messages)
         {
             bool contains = false;
@@ -92,7 +88,6 @@ namespace BOT_Platform.Interfaces
             }
             return contains; 
         }
-
         public static void GetUserId(ref string url)
         {
             url = url.Replace(" ", "");
@@ -150,7 +145,6 @@ namespace BOT_Platform.Interfaces
             }
             return url;
         }
-
         public static void CheckURL(ref string s)
         {
            s = s.Replace(" ", "%20")
@@ -160,7 +154,6 @@ namespace BOT_Platform.Interfaces
                 .Replace(",", "%2C")
                 .Replace("/", "%2F");
         }
-
         public static string CheckURL(string s)
         {
             return s.Replace(" ", "%20")
@@ -170,7 +163,6 @@ namespace BOT_Platform.Interfaces
                  .Replace(",", "%2C")
                  .Replace("/", "%2F");
         }
-
         public static Photo UploadImageInMessage(string photoName)
         {
             var uploadServer = BOT_API.app.Photo.GetMessagesUploadServer();

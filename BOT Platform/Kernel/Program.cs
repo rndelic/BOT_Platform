@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEBUG
+
+using System;
 using VkNet;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -8,6 +10,7 @@ using VkNet.Model;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using BOT_Platform.Interfaces;
+using System.Threading.Tasks;
 
 namespace BOT_Platform
 {
@@ -23,7 +26,7 @@ namespace BOT_Platform
         internal static Thread consoleThread;
 
         static int currentTimerTime = 0;
-        static List<Message> lastMessages;
+        static volatile List<Message> lastMessages;
 
         public static void Main()
         {
@@ -71,9 +74,7 @@ namespace BOT_Platform
                         lM.Add(new Message() { Body = newCommand });
                         messages.Messages = new ReadOnlyCollection<Message>(lM);
 
-                        List<Message> lm = new List<Message>();
-
-                        ExecuteCommand(messages, ref lm);
+                        ExecuteCommand(messages);
                     }
                 }
                 catch(Exception ex)
@@ -115,7 +116,7 @@ namespace BOT_Platform
                     {
                         return;
                     } 
-                    ExecuteCommand(messages, ref lastMessages);
+                    ExecuteCommand(messages);
                     Thread.Sleep(platformSett.Delay);
                 }
                 catch (Exception ex)
@@ -136,14 +137,53 @@ namespace BOT_Platform
             {
                 while (!ConnectivityChecker.CheckConnection())
                 {
+                    //TODO: Заменить на botThread
                     Thread.Sleep(30000);
                 }
                 CommandsList.ConsoleCommand("restart");
             }
         }
 
-        static void ExecuteCommand(MessagesGetObject messages, ref List<Message> lastMessages)
+        static object lockObject = new object();
+        //TODO: Распараллелить (STATUS: DONE)
+        static void ExecuteCommand(MessagesGetObject messages)
         {
+
+            Parallel.ForEach(messages.Messages, Message =>
+                {
+                    if (String.IsNullOrEmpty(Message.Body)) return;
+
+                    string botName = FindBotNameInMessage(Message);
+
+                    if (Message.ChatId != null && botName == "[NOT_FOUND]")
+                        return;
+
+                    lock (lockObject)
+                        if (Functions.ContainsMessage(Message, lastMessages)) return;
+
+                    CommandInfo comInfo = GetCommandFromMessage(Message, botName);
+
+                    lock (lockObject)
+                    {
+                        if (lastMessages.Count >= platformSett.MesRemembCount)
+                        {
+                            for (int j = 0; j < lastMessages.Count / 2; j++) lastMessages.RemoveAt(0);
+                        }
+                        lastMessages.Add(Message);
+                    }
+
+
+                    string temp = Message.Body;
+                    Message.Body = comInfo.command;
+                    Message.Title = temp;
+                    CommandsList.TryCommand(Message,
+                                            comInfo.param);
+                    Message.Body = temp;
+
+                    Thread.Sleep(platformSett.Delay);
+                }
+            );
+#if !DEBUG
             for (int i = 0; i < messages.Messages.Count; i++)
             {
                 if (String.IsNullOrEmpty(messages.Messages[i].Body)) continue;
@@ -174,6 +214,7 @@ namespace BOT_Platform
                 Thread.Sleep(platformSett.Delay);
 
             }
+#endif
         }
 
         struct CommandInfo
