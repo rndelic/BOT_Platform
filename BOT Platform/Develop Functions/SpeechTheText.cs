@@ -49,29 +49,39 @@ namespace MyFunctions
             speechSynth.Rate = 2;
             //speechSynth.SelectVoice("Microsoft Pavel Mobile");
             Functions.RemoveSpaces(ref text);
-            speechSynth.SetOutputToWaveFile(FILENAME,
-                                        new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
+            try
+            {
+                speechSynth.SetOutputToWaveFile(FILENAME,
+                                            new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
+            }
+            catch
+            {
+                speechSynth.SetOutputToNull();
+                throw;
+            }
 
             if (text[0] != '@')
                 speechSynth.Speak(text + ENDING); // озвучиваем переданный текст
             else
             {
-                if(text.Length - 1 <= 12)
-                {
-                    //Functions.SendMessage(message, "Текст аудиосообщения слишком короткий!" , message.ChatId != null);
-                    //return default(MessagesSendParams);
-                    speechSynth.SetOutputToNull();
-                    throw new WrongParamsException("Текст аудиосообщения слишком короткий!");
-                }
                 text = text.Substring(1);
                 speechSynth.Speak(text);
             }
+            
             speechSynth.SetOutputToNull();
 
             ConverWavToMp3();
 
             List<Audio> audioList = new List<Audio>();
-            audioList.Add(UploadAndSave(text));
+            try
+            {
+                audioList.Add(UploadAndSave(text));
+            }
+            catch(Exception ex)
+            {
+                if(ex.Message == "Access denied: filename is incorrect")
+                    throw new WrongParamsException("Текст аудиосообщения слишком короткий!");
+            }
 
             MessagesSendParams param = new MessagesSendParams();
             param.Attachments = new ReadOnlyCollection<Audio>(audioList);
@@ -80,18 +90,18 @@ namespace MyFunctions
         }
         static Audio UploadAndSave(string title)
         {
-            Uri uploadServer = BOT_API.app.Audio.GetUploadServer();
+            Uri uploadServer = BOT_API.GetApi().Audio.GetUploadServer();
 
             var wc = new WebClient();
             var response = Encoding.Default.GetString(wc.UploadFile(uploadServer.AbsoluteUri,FILENAMEMP3));
 
             Audio savedAudio;
             string t = title.Substring(0, title.Length > 50 ? 50 : title.Length);
-            savedAudio = BOT_API.app.Audio.Save(response, NAME, t);
+            savedAudio = BOT_API.GetApi().Audio.Save(response, NAME, t);
 
             if (title.Length > 50)
             {
-                BOT_API.app.Audio.Edit(savedAudio.Id.Value, BOT_API.app.UserId.Value, NAME, t , title);
+                BOT_API.GetApi().Audio.Edit(savedAudio.Id.Value, BOT_API.GetApi().UserId.Value, NAME, t , title);
             }
 
             return savedAudio;
@@ -134,7 +144,7 @@ namespace MyFunctions
         {
             string info = $"Справка по команде \"{message.Body}\":\n\n" +
                 "Команда голосом бота озвучивает указанный в скобках текст.\n\n" +
-                $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(я тебя люблю, не знаю почему) - бот озвучит и отправит аудиозапись с озвученным текстом.\n\n" +
+                $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(я тебя люблю, не знаю почему) - бот озвучит и отправит аудиозапись с озвученным текстом.\n\n" +
                 $"Данная функция реализована с помощью The Microsoft Cognitive Toolkit (Speech)";
 
             if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))

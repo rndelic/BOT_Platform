@@ -1,4 +1,4 @@
-﻿#define DEBUG
+﻿#define PARALLEL
 
 using System;
 using VkNet;
@@ -16,8 +16,17 @@ namespace BOT_Platform
 {
     static partial class BOT_API
     {
-        internal static volatile VkApi app = new VkApi();       /* Обьект самого приложения VK.NET */
-        internal volatile static PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
+        private static volatile VkApi app =  new VkApi();       /* Обьект самого приложения VK.NET */
+        public static VkApi GetApi()
+        {
+            return app;
+        }
+
+        private volatile static PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
+        public static PlatformSettings GetSettings()
+        {
+            return platformSett;
+        }
 
         const string DevNamespace = "MyFunctions";   /* Пространоство имён, содержащее только
                                                       * пользовательские функции
@@ -148,7 +157,6 @@ namespace BOT_Platform
         //TODO: Распараллелить (STATUS: DONE)
         static void ExecuteCommand(MessagesGetObject messages)
         {
-
             Parallel.ForEach(messages.Messages, Message =>
                 {
                     if (String.IsNullOrEmpty(Message.Body)) return;
@@ -171,19 +179,16 @@ namespace BOT_Platform
                         }
                         lastMessages.Add(Message);
                     }
-
-
                     string temp = Message.Body;
                     Message.Body = comInfo.command;
                     Message.Title = temp;
                     CommandsList.TryCommand(Message,
                                             comInfo.param);
                     Message.Body = temp;
-
-                    Thread.Sleep(platformSett.Delay);
                 }
             );
-#if !DEBUG
+            Thread.Sleep(platformSett.Delay);
+#if !PARALLEL
             for (int i = 0; i < messages.Messages.Count; i++)
             {
                 if (String.IsNullOrEmpty(messages.Messages[i].Body)) continue;

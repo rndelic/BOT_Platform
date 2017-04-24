@@ -41,9 +41,9 @@ namespace BOT_Platform
 
         void CDebug(Message message, params object[] p)
         {
-            if (message.Body == "debug" && BOT_API.platformSett.IsDebug == false)
+            if (message.Body == "debug" && BOT_API.GetSettings().IsDebug == false)
             {
-                BOT_API.platformSett.IsDebug = true;
+                BOT_API.GetSettings().IsDebug = true;
                 Console.Title = "DEBUG VERSION";
                 Console.WriteLine(
                     "---------------------" +
@@ -53,7 +53,7 @@ namespace BOT_Platform
 
             else if (message.Body == "undebug")
             {
-                BOT_API.platformSett.IsDebug = false;
+                BOT_API.GetSettings().IsDebug = false;
                 if (BOT_API.botThread != null)
                 {
 
@@ -88,7 +88,7 @@ namespace BOT_Platform
         {
             Message m = new Message()
             {
-                UserId = BOT_API.app.UserId,
+                UserId = BOT_API.GetApi().UserId,
                 ChatId = null
             };
             Functions.SendMessage(m, "Test");

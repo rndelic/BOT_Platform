@@ -13,14 +13,15 @@ namespace BOT_Platform.Interfaces
 {
     static class Functions
     {
-        public static void RemoveSpaces(ref string str)
+                public static void RemoveSpaces(ref string str)
         {
             //удаляем пробелы с начала
-            while (str[0] == ' ')
+            while (!string.IsNullOrEmpty(str) && str[0] == ' ')
             {
                 str = str.Remove(0, 1);
             }
 
+            if (string.IsNullOrEmpty(str)) return;
             //удаляем пробелы с конца
             int j;
             for (j = str.Length - 1; str[j] == ' '; j--) { }
@@ -30,11 +31,12 @@ namespace BOT_Platform.Interfaces
         public static string RemoveSpaces(string str)
         {
             //удаляем пробелы с начала
-            while (str[0] == ' ')
+            while (!string.IsNullOrEmpty(str) && str[0] == ' ')
             {
                 str = str.Remove(0, 1);
             }
 
+            if (string.IsNullOrEmpty(str)) return str;
             //удаляем пробелы с конца
             int j;
             for (j = str.Length - 1; str[j] == ' '; j--) { }
@@ -42,6 +44,7 @@ namespace BOT_Platform.Interfaces
 
             return str;
         }
+        
         public static void SendMessage(Message message, MessagesSendParams m, string body, bool isChat = false)
         {
             m.Message = body;
@@ -52,7 +55,7 @@ namespace BOT_Platform.Interfaces
             }
             else m.UserId = message.UserId;
 
-            if (BOT_API.platformSett.IsDebug == false) BOT_API.app.Messages.Send(m);
+            if (BOT_API.GetSettings().IsDebug == false) BOT_API.GetApi().Messages.Send(m);
             else Console.WriteLine(m.Message);
         }
         public static void SendMessage(Message m, string message, bool isChat = false)
@@ -70,7 +73,7 @@ namespace BOT_Platform.Interfaces
             }
             else msp.UserId = m.UserId;
 
-            if (BOT_API.platformSett.IsDebug == false) BOT_API.app.Messages.Send(msp);
+            if (BOT_API.GetSettings().IsDebug == false) BOT_API.GetApi().Messages.Send(msp);
             else Console.WriteLine(msp.Message);
         }
         public static bool ContainsMessage(Message containMes, IEnumerable<Message> Messages)
@@ -107,13 +110,13 @@ namespace BOT_Platform.Interfaces
                 }
                 else
                 {
-                    url = BOT_API.app.Users.Get(url).Id.ToString();
+                    url = BOT_API.GetApi().Users.Get(url).Id.ToString();
                 }
             }
 
             else if (reg.IsMatch(url))
             {
-                url = BOT_API.app.Users.Get(url).Id.ToString();
+                url = BOT_API.GetApi().Users.Get(url).Id.ToString();
             }
         }
         public static string GetUserId(string url)
@@ -135,13 +138,13 @@ namespace BOT_Platform.Interfaces
                 }
                 else
                 {
-                    url = BOT_API.app.Users.Get(url).Id.ToString();
+                    url = BOT_API.GetApi().Users.Get(url).Id.ToString();
                 }
             }
 
             else if (reg.IsMatch(url))
             {
-                url = BOT_API.app.Users.Get(url).Id.ToString();
+                url = BOT_API.GetApi().Users.Get(url).Id.ToString();
             }
             return url;
         }
@@ -165,12 +168,22 @@ namespace BOT_Platform.Interfaces
         }
         public static Photo UploadImageInMessage(string photoName)
         {
-            var uploadServer = BOT_API.app.Photo.GetMessagesUploadServer();
+            var uploadServer = BOT_API.GetApi().Photo.GetMessagesUploadServer();
             // Загрузить фотографию.
             var wc = new WebClient();
             var responseImg = Encoding.ASCII.GetString(wc.UploadFile(uploadServer.UploadUrl, photoName));
             // Сохранить загруженную фотографию
-            return BOT_API.app.Photo.SaveMessagesPhoto(responseImg)[0];
+            return BOT_API.GetApi().Photo.SaveMessagesPhoto(responseImg)[0];
+        }
+
+        public static Document UploadDocumentInMessage(string filename, string docName)
+        {
+            var uploadServer = BOT_API.GetApi().Docs.GetWallUploadServer();
+            // Загрузить документ.
+            var wc = new WebClient();
+            var responseDoc = Encoding.ASCII.GetString(wc.UploadFile(uploadServer.UploadUrl, filename));
+            // Сохранить загруженный документ
+            return BOT_API.GetApi().Docs.Save(responseDoc, docName)[0];
         }
     }
 }

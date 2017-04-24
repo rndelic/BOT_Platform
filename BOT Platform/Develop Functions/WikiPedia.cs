@@ -59,7 +59,7 @@ namespace MyFunctions
             string info = $"Справка по команде \"{message.Body}\":\n\n" +
                 "Команда находит статью в Википедии по заданному в скобках тексту.\n\n" +
                 "Обратите внимание, что имена собственные рекомендуется писать с заглавной буквы.\n\n" +
-                $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(Галилео Галилей) - бот найдёт и отправит статью о Галилее в Википедии";
+                $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(Галилео Галилей) - бот найдёт и отправит статью о Галилее в Википедии";
 
             if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
             {

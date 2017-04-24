@@ -52,7 +52,7 @@ namespace MyFunctions
 
             if (indexClub != -1) finalID = -Convert.ToInt32(domain.Substring(club.Length));
             else if (publicIndex != -1) finalID = -Convert.ToInt32(domain.Substring(publicC.Length));
-            else                {finalID = -BOT_API.app.Groups.GetById(new string[1] { domain })[0].Id; }
+            else                {finalID = -BOT_API.GetApi().Groups.GetById(new string[1] { domain })[0].Id; }
 
             StringBuilder sB = new StringBuilder();
             sB.Append("[https://vk.com/wall");
@@ -79,7 +79,7 @@ namespace MyFunctions
                 $"Справка по команде \"{message.Body}\":\n\n" +
                "Бот ищет в группе, указанной в скобках (ссылке на группу), все посты, содержащие заданными ключевые слова/словосочетания/предложения.\n\n" +
 
-               $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(https://vk.com/panda.panda, красные панды) - " +
+               $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(https://vk.com/panda.panda, красные панды) - " +
                $"бот отправит ссылку на все посты, где упоминается \"красные панды\".\n" +
                $"Пример ответа для данного запроса:\n[https://vk.com/wall-29439161?owners_only=1&q=%20%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D1%8B%D0%B5%20%D0%BF%D0%B0%D0%BD%D0%B4%D1%8B]";
 

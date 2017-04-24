@@ -127,26 +127,26 @@ namespace BOT_Platform
                 {
                     WriteErrorInfo(message.Title, ex);
                     Functions.SendMessage(message, ex.Message + "\n\n" +
-                                         $"Для получения справки по команде напишите {BOT_API.platformSett.BotName[0]}, {message.Body}",
+                                         $"Для получения справки по команде напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}",
                                          message.ChatId != null);
                 }
                 catch (Exception ex)
                 {
                     WriteErrorInfo(message.Title, ex);
                     Functions.SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
-                                         "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.platformSett.BotName[0] + ", команды) " +
+                                         "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.GetSettings().BotName[0] + ", команды) " +
                                          "или повторите запрос позже.\n\n" +
 
-                                          $"Для получения справки по команде напишите {BOT_API.platformSett.BotName[0]}, {message.Body}",
+                                          $"Для получения справки по команде напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}",
                                           message.ChatId != null);
                 }
             }
 
             else
             {
-              if(message.UserId != BOT_API.app.UserId)
+              if(message.UserId != BOT_API.GetApi().UserId)
                     Functions.SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
-                                    "или воспользуйтесь командой " + BOT_API.platformSett.BotName[0] + ", команды.",
+                                    "или воспользуйтесь командой " + BOT_API.GetSettings().BotName[0] + ", команды.",
                                     message.ChatId != null);
             }
         }

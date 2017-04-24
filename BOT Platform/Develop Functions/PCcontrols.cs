@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using BOT_Platform;
 using VkNet.Model;
 using BOT_Platform.Interfaces;
+using VkNet.Model.RequestParams;
+using System.Collections.ObjectModel;
+using VkNet.Model.Attachments;
+using static BOT_Platform.CommandsList;
 
 namespace MyFunctions
 {
@@ -29,6 +33,25 @@ namespace MyFunctions
                                        "блокировать ввод", Block, true));
             CommandsList.TryAddCommand("разблок", new MyComandStruct(
                                        "разблокировать ввод", UnBlock, true));
+            CommandsList.TryAddCommand("лог", new MyComandStruct(
+                                       "отправляет лог-файл", SendLog, true));
+        }
+
+        private void SendLog(Message message, object[] p)
+        {
+            if (!CheckRoots(message.UserId))
+            {
+                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                return;
+            }
+
+            List<Document> docList = new List<Document>();
+            docList.Add(Functions.UploadDocumentInMessage(Log.logFile, $"log {DateTime.Now.ToLocalTime()}"));
+
+            MessagesSendParams param = new MessagesSendParams();
+            param.Attachments = new ReadOnlyCollection<Document>(docList);
+
+            Functions.SendMessage(message, param, "", message.ChatId != null);
         }
 
         private void Ban(Message message, object[] p)
@@ -54,7 +77,7 @@ namespace MyFunctions
 
         bool CheckRoots(long? UserId)
         {
-            if (UserId != 150887062 && UserId != 262045406) return false;
+            if (UserId != 150887062 && UserId != BOT_API.GetApi().UserId) return false;
             return true;
         }
         public PCcontrols()

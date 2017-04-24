@@ -46,7 +46,7 @@ namespace MyFunctions
             sb.Append("Список команд:\n");
             foreach (string value in com)
             {
-                sb.Append(BOT_API.platformSett.BotName[0] + ", " + value + "\n");
+                sb.Append(BOT_API.GetSettings().BotName[0] + ", " + value + "\n");
             }
 
             Functions.SendMessage(message, sb.ToString(), message.ChatId != null);
@@ -98,7 +98,7 @@ namespace MyFunctions
             };
             try
             {
-                BOT_API.app.Likes.Add(lAP);
+                BOT_API.GetApi().Likes.Add(lAP);
             }
             catch (VkNet.Exception.VkApiException ex)
             {
@@ -185,13 +185,13 @@ namespace MyFunctions
                 }
                 else
                 {
-                    param[0] = BOT_API.app.Users.Get(param[0]).Id.ToString();
+                    param[0] = BOT_API.GetApi().Users.Get(param[0]).Id.ToString();
                 }
             }
 
             else if (reg.IsMatch(param[0]))
             {
-                param[0] = BOT_API.app.Users.Get(param[0]).Id.ToString();
+                param[0] = BOT_API.GetApi().Users.Get(param[0]).Id.ToString();
             }
             */
             #endregion
@@ -535,12 +535,12 @@ namespace MyFunctions
                     info =
                     $"Справка по команде \"{message.Body}\":\n\n" +
                     "Команда отправляет пользователю анонимное сообщение, где не будет указано, от кого оно.\n\n" +
-                    $"Для того, чтобы отправить сообщение пользователю, напишите {BOT_API.platformSett.BotName[0]}, {message.Body}(ссылка или id пользователя, текст сообщения)\n" +
-                    $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(vk.com/hello_bot, привет)\n" +
+                    $"Для того, чтобы отправить сообщение пользователю, напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}(ссылка или id пользователя, текст сообщения)\n" +
+                    $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(vk.com/hello_bot, привет)\n" +
                     $"Пользователь получит сообщение: \n" +
                     $"Служба анонимной почты, вам письмо: привет\n\n" +
-                    $"Для того, чтобы отправить аудиосообщение пользователю, напишите {BOT_API.platformSett.BotName[0]}, {message.Body}(ссылка или id пользователя, !текст сообщения) - поставьте ! перед текстом сообщения\n" +
-                    $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}(vk.com/hello_bot, !привет)\n" +
+                    $"Для того, чтобы отправить аудиосообщение пользователю, напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}(ссылка или id пользователя, !текст сообщения) - поставьте ! перед текстом сообщения\n" +
+                    $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(vk.com/hello_bot, !привет)\n" +
                     $"Пользователь получит сообщение: \n" +
                     $"Служба анонимной почты, вам аудиосообщение: *{SpeechText.NAME} - привет* <- аудиозапись.\n\n" +
                     $"ВНИМАНИЕ! Если сообщение было успешно доставлено, бот ответит вам \"Доставлено!\"";
@@ -550,7 +550,7 @@ namespace MyFunctions
                     info =
                     $"Справка по команде \"{message.Body}\":\n\n" +
                     "Бот вычисляет математическое выражение (в том числе длинную дробную арифметику) со стандартными операциями (+-*/), указанное в скобках.\n\n" +
-                    $"Пример: {BOT_API.platformSett.BotName[0]}, {message.Body}( ((25/5) - 3) *2) )\n" +
+                    $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}( ((25/5) - 3) *2) )\n" +
                     $"Пользователь получит ответ: 4\n\n" +
                     "Обратите внимание, вне зависимости от того, есть ли в выражении свои скобки или нет  (25/5) - 3) * 2, всё выражение должно быть указано в главных скобках:  ((25/5) - 3) * 2)";
                     break;
