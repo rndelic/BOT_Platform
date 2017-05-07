@@ -10,5 +10,6 @@ Now BOT can:
 5) Translate (Powered by Yandex.Translate)
 6) Search entries in groups by keywords / suggestions
 7) Added the ability to overlay text on image
-8) Other funny, but less important things (:
+8) Added the ability to create gif-animation from several pictures
+9) Other funny, but less important things (:
 
