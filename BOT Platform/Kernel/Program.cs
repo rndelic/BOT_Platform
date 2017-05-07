@@ -16,10 +16,10 @@ namespace BOT_Platform
 {
     static partial class BOT_API
     {
-        private static volatile VkApi app =  new VkApi();       /* Обьект самого приложения VK.NET */
+        private static volatile VkApi _app = new VkApi();       /* Обьект самого приложения VK.NET */
         public static VkApi GetApi()
         {
-            return app;
+            return _app;
         }
 
         private volatile static PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
@@ -59,7 +59,6 @@ namespace BOT_Platform
 
             CommandsList.ConsoleCommand("start"); //заглушка
             ClearCommands.Invoke(new object(), null);
-            Thread.Sleep(200);
             /* Подключаем модули */
             ExecuteModules();
 
@@ -102,7 +101,7 @@ namespace BOT_Platform
             try
             {
                 Console.WriteLine("[Запуск бота...]");
-                app.Authorize(platformSett.AuthParams);
+                _app.Authorize(platformSett.AuthParams);
 
                 Console.WriteLine("Бот запущен.");
             }
@@ -120,7 +119,7 @@ namespace BOT_Platform
                 try
                 {
                     /* Получаем нужное количество сообщений для обработки согласно настройкам бота*/
-                    if (platformSett.IsDebug == false) messages = app.Messages.Get(platformSett.MesGetParams);
+                    if (platformSett.IsDebug == false) messages = _app.Messages.Get(platformSett.MesGetParams);
                     else
                     {
                         return;
@@ -154,7 +153,9 @@ namespace BOT_Platform
         }
 
         static object lockObject = new object();
-        //TODO: Распараллелить (STATUS: DONE)
+
+        public static string DevNamespace1 => DevNamespace;
+
         static void ExecuteCommand(MessagesGetObject messages)
         {
             Parallel.ForEach(messages.Messages, Message =>
@@ -170,7 +171,7 @@ namespace BOT_Platform
                         if (Functions.ContainsMessage(Message, lastMessages)) return;
 
                     CommandInfo comInfo = GetCommandFromMessage(Message, botName);
-
+                    
                     lock (lockObject)
                     {
                         if (lastMessages.Count >= platformSett.MesRemembCount)
@@ -180,10 +181,10 @@ namespace BOT_Platform
                         lastMessages.Add(Message);
                     }
                     string temp = Message.Body;
-                    Message.Body = comInfo.command;
+                    Message.Body = comInfo.Command;
                     Message.Title = temp;
                     CommandsList.TryCommand(Message,
-                                            comInfo.param);
+                                          comInfo.Param);
                     Message.Body = temp;
                 }
             );
@@ -224,13 +225,13 @@ namespace BOT_Platform
 
         struct CommandInfo
         {
-            public string command { get; private set; }
-            public string param { get; private set; }
+            public string Command { get; private set; }
+            public string Param { get; private set; }
 
             public CommandInfo(string command, string param)
             {
-                this.command = command;
-                this.param = param;
+                this.Command = command;
+                this.Param = param;
             }
         }
         static CommandInfo GetCommandFromMessage(Message message, string botName)
@@ -298,7 +299,7 @@ namespace BOT_Platform
             Console.WriteLine("[Подключение модулей...]");
 
             /* Подключаем модули, создавая обьекты их классов */
-            Type[] typelist = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == DevNamespace).ToArray();
+            Type[] typelist = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == DevNamespace1).ToArray();
             foreach (Type type in typelist)
             {
                 Activator.CreateInstance(Type.GetType(type.FullName));

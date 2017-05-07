@@ -7,9 +7,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using MyFunctions.Exceptions;
 using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
@@ -30,7 +32,8 @@ namespace MyFunctions
 
             List<Photo> photoList = new List<Photo>();
             var webClient = new WebClient();
-            string[] text = p[0].ToString().Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            string[] text = p[0].ToString().Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries)
+                                           .Reverse().ToArray();
 
             if(text.Length == 0 || String.IsNullOrWhiteSpace(text[0]) ||
                                    String.IsNullOrEmpty(text[0]) ||
@@ -54,7 +57,11 @@ namespace MyFunctions
             }
 
             Photo photo = ((message.Attachments[0].Instance) as Photo);
-
+            if (photo == null)
+            {
+                Functions.SendMessage(message, "Прикрепи изображение!", message.ChatId != null);
+                return;
+            }
                     if      (photo.Photo2560 != null) webClient.DownloadFile(photo.Photo2560, IN_FILENAME);
                     else if (photo.Photo1280 != null) webClient.DownloadFile(photo.Photo1280, IN_FILENAME);
                     else if (photo.Photo807  != null) webClient.DownloadFile(photo.Photo807,  IN_FILENAME);
@@ -72,7 +79,7 @@ namespace MyFunctions
                     File.Delete(IN_FILENAME);
         }
 
-        void DrawAndSave(string[] text, float mlp = 1.2f)
+        void DrawAndSave(string[] text, float mlp = 1.1f)
         {
             Image image = Image.FromFile(IN_FILENAME);
             Graphics graphics = Graphics.FromImage(image);
@@ -85,97 +92,60 @@ namespace MyFunctions
                 Functions.RemoveSpaces(ref text[i]);
             }
 
-            if (text.Length == 1)
+            using (Graphics g = Graphics.FromImage(image))
             {
-                using (Graphics g = Graphics.FromImage(image))
+                //g.InterpolationMode = InterpolationMode.High;
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                //g.CompositingQuality = CompositingQuality.HighQuality;
+
+                FontFamily ff = new FontFamily(FONT_NAME);
+
+                if (Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp <= 0)
                 {
-                    //g.InterpolationMode = InterpolationMode.High;
-                    g.SmoothingMode = SmoothingMode.HighQuality;
-                    //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    //g.CompositingQuality = CompositingQuality.HighQuality;
-
-                    FontFamily ff = new FontFamily(FONT_NAME);
-                    Font font = new Font(ff, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp, FontStyle.Regular);
-                    StringFormat sf = new StringFormat();
-
-                    SizeF textSize = graphics.MeasureString(text[0], font);
-
-                    GraphicsPath gp = new GraphicsPath();
-                    gp.AddString(text[0], ff, (int)FontStyle.Regular, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
-
-                    GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
-                    // outline the path
-                    outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f));//6
-
-                    g.FillPath(Brushes.Black, outlinePath);
-                    g.FillPath(Brushes.White, gp);
-
-                    //g.Flush(FlushIntention.Sync);
-                    image.Save(OUT_FILENAME);
-                    g.Dispose();
-                    gp.Dispose();
-                    outlinePath.Dispose();
+                    throw new WrongParamsException("Текст слишком длинный для данного изображения.");
                 }
-            }
 
-            else
-            {
-                using (Graphics g = Graphics.FromImage(image))
+                Font font = new Font(ff, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp,
+                    FontStyle.Regular);
+                StringFormat sf = new StringFormat();
+
+                SizeF textSize = graphics.MeasureString(text[0], font);
+
+                GraphicsPath gp = new GraphicsPath();
+                gp.AddString(text[0], ff, (int) FontStyle.Regular,
+                    font.SizeInPoints + 1,
+                    new PointF(Math.Abs(image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
+
+                GraphicsPath outlinePath = (GraphicsPath) gp.Clone();
+                // outline the path
+                outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f)); //6
+
+                g.FillPath(Brushes.Black, outlinePath);
+                g.FillPath(Brushes.White, gp);
+
+                if (text.Length > 1)
                 {
-                    //g.InterpolationMode = InterpolationMode.High;
-                    g.SmoothingMode = SmoothingMode.HighQuality;
-                    //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    //g.CompositingQuality = CompositingQuality.HighQuality;
+                    if (Math.Min((image.Width / text[1].Length), image.Height / 4) * mlp <= 0)
+                    {
+                        throw new WrongParamsException("Текст слишком длинный для данного изображения.");
+                    }
 
-                    FontFamily ff = new FontFamily(FONT_NAME);
-                    Font font = new Font(ff, Math.Min((image.Width / text[1].Length), image.Height / 4) * mlp, FontStyle.Regular);
-                    StringFormat sf = new StringFormat();
+                    font = new Font(ff, Math.Min((image.Width / text[1].Length), image.Height / 4) * mlp, FontStyle.Regular);
+                    sf = new StringFormat();
 
-                    SizeF textSize = graphics.MeasureString(text[1], font);
-                    GraphicsPath gp = new GraphicsPath();
-                    gp.AddString(text[1], ff, (int)FontStyle.Regular, Math.Min((image.Width / text[1].Length), image.Height / 4) * mlp + 1, new PointF((image.Width - textSize.Width) / 2, image.Height - textSize.Height), sf);
+                    textSize = graphics.MeasureString(text[1], font);
+                    gp = new GraphicsPath();
+                    gp.AddString(text[1], ff, (int)FontStyle.Regular, font.SizeInPoints + 1, new PointF(Math.Abs(image.Width - textSize.Width) / 2, 0), sf); //image.Height * 0.04f
 
-                    GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
-                    // outline the path
+                    outlinePath = (GraphicsPath)gp.Clone();
                     outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f));
 
                     g.FillPath(Brushes.Black, outlinePath);
                     g.FillPath(Brushes.White, gp);
-
-                    //g.Flush(FlushIntention.Sync);
-                    image.Save(OUT_FILENAME);
-                    g.Dispose();
-                    gp.Dispose();
-                    outlinePath.Dispose();
                 }
-                using (Graphics g = Graphics.FromImage(image))
-                {
-                    //g.InterpolationMode = InterpolationMode.High;
-                    g.SmoothingMode = SmoothingMode.HighQuality;
-                    //g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    //g.CompositingQuality = CompositingQuality.HighQuality;
 
-                    FontFamily ff = new FontFamily(FONT_NAME);
-                    Font font = new Font(ff, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp, FontStyle.Regular);
-                    StringFormat sf = new StringFormat();
-
-                    SizeF textSize = graphics.MeasureString(text[0], font);
-                    GraphicsPath gp = new GraphicsPath();
-                    gp.AddString(text[0], ff, (int)FontStyle.Regular, Math.Min((image.Width / text[0].Length), image.Height / 4) * mlp + 1, new PointF((image.Width - textSize.Width) / 2, 0), sf); //image.Height * 0.04f
-
-                    GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
-                    // outline the path
-                    outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f));
-
-                    g.FillPath(Brushes.Black, outlinePath);
-                    g.FillPath(Brushes.White, gp);
-
-                    //g.Flush(FlushIntention.Sync);
-                    image.Save(OUT_FILENAME);
-                    g.Dispose();
-                    gp.Dispose();
-                    outlinePath.Dispose();
-                }
+                //g.Flush(FlushIntention.Sync);
             }
 
             graphics.Dispose();

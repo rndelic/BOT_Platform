@@ -43,7 +43,8 @@ namespace MyFunctions
         {
             List<string> com = CommandsList.GetCommandList(true);
             StringBuilder sb = new StringBuilder();
-            sb.Append("Список команд:\n");
+            sb.Append("Напоминание! Все параметры пишутся внутри единых скобок через разделитель!\nСписок команд:\n");
+
             foreach (string value in com)
             {
                 sb.Append(BOT_API.GetSettings().BotName[0] + ", " + value + "\n");
@@ -220,6 +221,7 @@ namespace MyFunctions
             Functions.SendMessage(message, "Доставлено!", message.ChatId!=null);
             }
 
+        /* Этот говнкод я писал оооочень давно */
         private string SolveExample(string test)
         {
 
@@ -487,8 +489,6 @@ namespace MyFunctions
                         }
                         if (c.Length == 2 && c.Contains(',') == true) c = c.Substring(0, 1);
                     }
-
-                    //double k = Convert.ToDouble(c);
 
                     numbersList[PrevNumber + 1] = c.ToString();
                     if (numbersList[PrevNumber][0] == '-')

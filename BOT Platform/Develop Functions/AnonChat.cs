@@ -256,7 +256,7 @@ namespace MyFunctions
             catch (SerializationException e)
             {
                 Console.WriteLine("[SYSTEM][ERROR]:\n" +
-                                  "Ошибка при сериализации чата: " + e.Message);
+                                  "Ошибка при сериализации : " + e.Message);
             }
             finally
             {

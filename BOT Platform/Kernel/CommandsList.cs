@@ -65,16 +65,16 @@ namespace BOT_Platform
             if (banList.ContainsKey(id))
             {
                 Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine("[ERROR] Пользователь " + id + " уже был забанен");
+                Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен");
                 Console.WriteLine("---------------------------------------------------------------------");
-                Functions.SendMessage(message, "[ERROR] Пользователь " + id + " уже был забанен",
+                Functions.SendMessage(message, "[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен",
                                       message.ChatId != null);
             }
 
             else
             {
                 banList.Add(id, description);
-                Functions.SendMessage(message, "Пользователь " + id + " ЗАбанен!",
+                Functions.SendMessage(message, "Пользователь https://vk.com/id" + id + " ЗАбанен!",
                                       message.ChatId != null);
             }
         }
@@ -83,16 +83,16 @@ namespace BOT_Platform
             if (banList.ContainsKey(id))
             {
                 banList.Remove(id);
-                Functions.SendMessage(message, "Пользователь " + id + " был РАЗбанен!",
+                Functions.SendMessage(message, "Пользователь https://vk.com/id" + id + " был РАЗбанен!",
                                       message.ChatId != null);
             }
 
             else
             {
                 Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine("[ERROR] Пользователь " + id + " не был забанен");
+                Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " не был забанен");
                 Console.WriteLine("---------------------------------------------------------------------");
-                Functions.SendMessage(message, "[ERROR] Пользователь " + id + " не был забанен",
+                Functions.SendMessage(message, "[ERROR] Пользователь https://vk.com/id" + id + " не был забанен",
                                       message.ChatId != null);
             }
         }
@@ -125,14 +125,14 @@ namespace BOT_Platform
                 }
                 catch (BotPlatformException ex)
                 {
-                    WriteErrorInfo(message.Title, ex);
+                    WriteErrorInfo(message, ex);
                     Functions.SendMessage(message, ex.Message + "\n\n" +
                                          $"Для получения справки по команде напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}",
                                          message.ChatId != null);
                 }
                 catch (Exception ex)
                 {
-                    WriteErrorInfo(message.Title, ex);
+                    WriteErrorInfo(message, ex);
                     Functions.SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
                                          "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.GetSettings().BotName[0] + ", команды) " +
                                          "или повторите запрос позже.\n\n" +
@@ -180,10 +180,12 @@ namespace BOT_Platform
             return list;
         }
 
-        static void WriteErrorInfo(string command, Exception ex)
+        static void WriteErrorInfo(Message message, Exception ex)
         {
             string text = "---------------------------------------------------------------------\n" +
-                          $"[ERROR { DateTime.Now.ToLongTimeString()}] \"" + command + "\"\n" + ex.Message + "\n" +
+                          $"[ERROR { DateTime.Now.ToLongTimeString()}]\n" +
+                          $"От: https://vk.com/id{message.UserId}\n" +
+                          $"Команда: \"" + message.Title + "\"\n" + ex.Message + "\n" +
                           "[STACK_TRACE] " + ex.StackTrace + "\n" +
                           "---------------------------------------------------------------------\n";
             Console.WriteLine(text);
