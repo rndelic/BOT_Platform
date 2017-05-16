@@ -15,6 +15,17 @@ namespace MyFunctions
             CommandsList.TryAddCommand("как сдать", new MyComandStruct("Как сдать матан?", HowTo,true));
             CommandsList.TryAddCommand("дай на шмот", new MyComandStruct("Для тучи", Tucha, true));
             CommandsList.TryAddCommand("ты солнышко", new MyComandStruct("", Jane, true));
+            CommandsList.TryAddCommand("компот", new MyComandStruct("", Smuzi, true));
+        }
+
+        private void Smuzi(Message message, object[] p)
+        {
+            if (message.UserId == 152461768)
+                Functions.SendMessage(message, "не компот, а смузи 🍹", message.ChatId != null);
+            else
+            {
+                Functions.SendMessage(message, "Ты не Алёнка :c", message.ChatId != null);
+            }
         }
 
         private void Tucha(Message message, object[] p)

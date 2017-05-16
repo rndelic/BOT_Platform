@@ -123,7 +123,7 @@ namespace MyFunctions
                 Console.WriteLine("Невозможно перевести ПК в спящий режим");
                 Functions.SendMessage(message, "Невозможно перевести ПК в спящий режим", message.ChatId != null);
             }
-            else Functions.SendMessage(message, "ПК был переведён в спящий режим", message.ChatId != null);
+            //else Functions.SendMessage(message, "ПК был переведён в спящий режим", message.ChatId != null);
         }
     }
 }

@@ -17,20 +17,20 @@ namespace MyFunctions
         public void AddMyCommandInPlatform()
         { 
             CommandsList.TryAddCommand("анонимно", new MyComandStruct(
-                                       "анонимно(id получателя или ссылка, текст сообщения)", AnonimSend));
+                                       "Пример: анонимно(id получателя или ссылка, текст сообщения)", AnonimSend));
             CommandsList.TryAddCommand("скажи", new MyComandStruct(
-                                       "скажи(текст сообщения).", Say));
+                                       "Пример: скажи(текст сообщения).", Say));
             CommandsList.TryAddCommand("команды", new MyComandStruct(
                                        "Показывает список всех команд", ShowCommands));
 
             CommandsList.TryAddCommand("рандом", new MyComandStruct(
-                                       "рандом, или рандом(макс знач.), или рандом(мин,макс)", BRandom));
+                                       "Пример: рандом, или рандом(макс знач.), или рандом(мин,макс)", BRandom));
             CommandsList.TryAddCommand("что", new MyComandStruct(
-                                       "что(1 вариант,2вариант,...)", What));
+                                       "Пример: что(1 вариант,2вариант,...)", What));
             CommandsList.TryAddCommand("лайкни", new MyComandStruct(
-                                       "лайкни(открытая ссылка на фото или пост)", Like));
+                                       "Пример: лайкни(открытая ссылка на фото или пост)", Like));
             CommandsList.TryAddCommand("вычисли", new MyComandStruct(
-                                       "вычисли(выражение с /,*,+,-) beta = баги", Solve));
+                                       "Пример: вычисли(выражение с /,*,+,-) beta = баги", Solve));
             CommandsList.TryAddCommand("поддержка", new MyComandStruct(
                                        "Обратиться к разработчику", Support));
         }

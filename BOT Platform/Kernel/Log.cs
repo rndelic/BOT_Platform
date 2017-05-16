@@ -10,12 +10,11 @@ namespace BOT_Platform
 {
     public static partial class CommandsList
     {
-        public class Log
+        public static class Log
         {
-            public static string logFile = "Data\\BotData\\log.txt";
-            Thread writeThread;
-            object lockObj = new object();
-            void InLog(object text)
+            public static readonly string logFile = "Data\\BotData\\log.txt";
+            static object lockObj = new object();
+            static void InLog(object text)
             {
                 lock(lockObj)
                 {
@@ -25,13 +24,9 @@ namespace BOT_Platform
                     }
                 }
             }
-            public Log()
+            public static void WriteLog(string text)
             {
-                writeThread = new Thread(new ParameterizedThreadStart(InLog));
-            }
-            public void WriteLog(string text)
-            {
-                writeThread.Start(text);
+                Task.Run(()=> InLog(text));
             }
         }
     }

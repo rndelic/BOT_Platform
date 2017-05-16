@@ -190,8 +190,7 @@ namespace BOT_Platform
                           "---------------------------------------------------------------------\n";
             Console.WriteLine(text);
 
-            Log log = new Log();
-            log.WriteLog(text);
+            Log.WriteLog(text);
         }
     }
 }

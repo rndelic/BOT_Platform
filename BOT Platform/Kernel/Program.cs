@@ -22,7 +22,7 @@ namespace BOT_Platform
             return _app;
         }
 
-        private volatile static PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
+        private static volatile PlatformSettings platformSett; /* Здесь хранятся все настройки бота */
         public static PlatformSettings GetSettings()
         {
             return platformSett;
@@ -141,13 +141,20 @@ namespace BOT_Platform
 
         static void TryToRestartSystem()
         {
-            if (!ConnectivityChecker.CheckConnection())
+            Console.WriteLine("[NET_INFO " + DateTime.Now.ToLongTimeString() + "] Попытка подключиться к vk.com...");
+            var answer = ConnectivityChecker.CheckConnection();
+            if (!answer.status)
             {
-                while (!ConnectivityChecker.CheckConnection())
+                do
                 {
+                    Console.WriteLine(answer.info);
+                    Thread.Sleep(millisecondsTimeout: 30000);
+
+                 	Console.WriteLine("[NET_INFO " + DateTime.Now.ToLongTimeString() + "] Попытка подключиться к vk.com...");
+                 	answer = ConnectivityChecker.CheckConnection();
                     //TODO: Заменить на botThread
-                    Thread.Sleep(30000);
-                }
+                } while(!answer.status);
+
                 CommandsList.ConsoleCommand("restart");
             }
         }

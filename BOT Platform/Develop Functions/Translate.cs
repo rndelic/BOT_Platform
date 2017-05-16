@@ -2,7 +2,6 @@
 using System;
 using System.Text;
 using VkNet.Model;
-using Google.API.Translate;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
@@ -47,8 +46,8 @@ namespace MyFunctions
             if (param.Length == 1)
             {
                 Functions.RemoveSpaces(ref param[0]);
-                if (param[0][0] == '!') result = YT.Translate(Functions.RemoveSpaces(param[0].Substring(1)), "ru");
-                else                    result = YT.Translate(Functions.RemoveSpaces(param[0]), "en");
+                result = param[0][0] == '!' ? YT.Translate(Functions.RemoveSpaces(param[0].Substring(1)), "ru") :
+                                              YT.Translate(Functions.RemoveSpaces(param[0]), "en");
             }
             else result = YT.Translate(Functions.RemoveSpaces(param[1]), param[0]);
           
