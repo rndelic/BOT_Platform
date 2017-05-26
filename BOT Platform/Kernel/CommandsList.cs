@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
+using  System.Threading;
 
 namespace BOT_Platform
 {
@@ -44,7 +45,7 @@ namespace BOT_Platform
                 BOT_API.ClearCommands += BOT_API_ClearCommands;
             }
 
-        public delegate void Function(Message message, params object[] p);
+        public delegate void Function(Message message, string args, Bot bot);
 
         static SortedDictionary<string, MyComandStruct> commandList =
             new SortedDictionary<string, MyComandStruct>();
@@ -60,39 +61,39 @@ namespace BOT_Platform
                 consoleCommandList.Add(command, mcs);
         }
 
-        public static void TryBanUser(Message message, string id, string description)
+        public static void TryBanUser(Message message, string id, string description, Bot bot)
         {
             if (banList.ContainsKey(id))
             {
                 Console.WriteLine("---------------------------------------------------------------------");
                 Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен");
                 Console.WriteLine("---------------------------------------------------------------------");
-                Functions.SendMessage(message, "[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен",
+                Functions.SendMessage(bot, message, "[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен",
                                       message.ChatId != null);
             }
 
             else
             {
                 banList.Add(id, description);
-                Functions.SendMessage(message, "Пользователь https://vk.com/id" + id + " ЗАбанен!",
+                Functions.SendMessage(bot, message, "Пользователь https://vk.com/id" + id + " ЗАбанен!",
                                       message.ChatId != null);
             }
         }
-        public static void TryUnBanUser(Message message, string id)
+        public static void TryUnBanUser(Message message, string id, Bot bot)
         {
             if (banList.ContainsKey(id))
             {
                 banList.Remove(id);
-                Functions.SendMessage(message, "Пользователь https://vk.com/id" + id + " был РАЗбанен!",
+                Functions.SendMessage(bot, message, "Пользователь https://vk.com/id" + id + " был РАЗбанен!",
                                       message.ChatId != null);
             }
 
             else
             {
                 Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " не был забанен");
+                Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " не был ЗАбанен");
                 Console.WriteLine("---------------------------------------------------------------------");
-                Functions.SendMessage(message, "[ERROR] Пользователь https://vk.com/id" + id + " не был забанен",
+                Functions.SendMessage(bot, message, "[ERROR] Пользователь https://vk.com/id" + id + " не был ЗАбанен",
                                       message.ChatId != null);
             }
         }
@@ -103,17 +104,18 @@ namespace BOT_Platform
             banList.Clear();
         }
 
-        internal static void ConsoleCommand(string command)
+        internal static void ConsoleCommand(string command, string args, Bot bot)
         {
             if (!String.IsNullOrEmpty(command) && consoleCommandList.ContainsKey(command)) 
-                consoleCommandList[command].Function(new Message() { Body = command});
+                consoleCommandList[command].Function(new Message() { Body = command}, args, bot);
         }
 
-        internal static void TryCommand(Message message, params object[] obj)
+        internal static void TryCommand(Message message, string args, Bot bot)
         {
+
             if (banList.ContainsKey(message.UserId.ToString()))
             {
-                Functions.SendMessage(message, banList[message.UserId.ToString()],
+                Functions.SendMessage(bot, message, banList[message.UserId.ToString()],
                                           message.ChatId != null);
                 return;
             }
@@ -121,32 +123,43 @@ namespace BOT_Platform
             {
                 try
                 {
-                  commandList[message.Body].Function(message, obj);
+                    commandList[message.Body].Function(message, args, bot);
                 }
                 catch (BotPlatformException ex)
                 {
-                    WriteErrorInfo(message, ex);
-                    Functions.SendMessage(message, ex.Message + "\n\n" +
-                                         $"Для получения справки по команде напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}",
-                                         message.ChatId != null);
+                    WriteErrorInfo(message, ex, bot);
+                    Functions.SendMessage(bot, message, ex.Message + "\n\n" +
+                                                        $"Для получения справки по команде напишите {bot.GetSettings().BotName[0]}, {message.Body}",
+                        message.ChatId != null);
                 }
                 catch (Exception ex)
                 {
-                    WriteErrorInfo(message, ex);
-                    Functions.SendMessage(message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
-                                         "Убедитесь, что параметры переданы правильно (инфо: " + BOT_API.GetSettings().BotName[0] + ", команды) " +
-                                         "или повторите запрос позже.\n\n" +
+                    WriteErrorInfo(message, ex, bot);
+                    if (ex.InnerException is BotPlatformException)
+                    {
+                        Functions.SendMessage(bot, message, ex.InnerException.Message + "\n\n" +
+                                                            $"Для получения справки по команде напишите {bot.GetSettings().BotName[0]}, {message.Body}",
+                            message.ChatId != null);
+                    }
+                    else
+                    {
+                        Functions.SendMessage(bot, message, "Произошла ошибка при выполнении команды ¯\\_(ツ)_/¯.\n" +
+                                                            "Убедитесь, что параметры переданы правильно (инфо: " +
+                                                            bot.GetSettings().BotName[0] + ", команды) " +
+                                                            "или повторите запрос позже.\n\n" +
 
-                                          $"Для получения справки по команде напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}",
-                                          message.ChatId != null);
+                                                            $"Для получения справки по команде напишите {bot.GetSettings().BotName[0]}, {message.Body}",
+                            message.ChatId != null);
+                    }
+
                 }
             }
 
             else
             {
-              if(message.UserId != BOT_API.GetApi().UserId)
-                    Functions.SendMessage(message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
-                                    "или воспользуйтесь командой " + BOT_API.GetSettings().BotName[0] + ", команды.",
+              if(message.UserId != bot.GetApi().UserId)
+                    Functions.SendMessage(bot, message, "Команда \"" + message.Body +"\" не распознана ¯\\_(ツ)_/¯. \nПроверьте правильность написания " +
+                                    "или воспользуйтесь командой " + bot.GetSettings().BotName[0] + ", команды.",
                                     message.ChatId != null);
             }
         }
@@ -180,7 +193,7 @@ namespace BOT_Platform
             return list;
         }
 
-        static void WriteErrorInfo(Message message, Exception ex)
+        static void WriteErrorInfo(Message message, Exception ex, Bot bot)
         {
             string text = "---------------------------------------------------------------------\n" +
                           $"[ERROR { DateTime.Now.ToLongTimeString()}]\n" +
@@ -190,7 +203,7 @@ namespace BOT_Platform
                           "---------------------------------------------------------------------\n";
             Console.WriteLine(text);
 
-            Log.WriteLog(text);
+            Log.WriteLog(text, bot.Directory);
         }
     }
 }

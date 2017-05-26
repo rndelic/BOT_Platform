@@ -13,6 +13,7 @@ using WaveLib;
 using Yeti.Lame;
 using Yeti.MMedia.Mp3;
 using System.IO;
+using System.Linq;
 using MyFunctions.Exceptions;
 using BOT_Platform.Interfaces;
 
@@ -20,8 +21,7 @@ namespace MyFunctions
 {
     class SpeechText: IMyCommands
     {
-        const string FILENAME    = "file.wav";
-        const string FILENAMEMP3 = "file.mp3";
+        private const string DIRECTORY_PATH = @"Data\SpeechText";
         public const string NAME = "mmBOT";
 
         const string ENDING = ". ахахах этот бот лучше всех";
@@ -31,27 +31,27 @@ namespace MyFunctions
             CommandsList.TryAddCommand("произнеси", new MyComandStruct("Возвращает аудиозапись с озвученным текстом", Speech));
         }
 
-        
-        public static void Speech(Message message, params object[] p)
+        public static void Speech(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo1(message, p)) return;
+            if (NeedCommandInfoStatic(message, args, bot)) return;
 
-            MessagesSendParams param = MakeSpeechAttachment(p[0].ToString(), message);
+            MessagesSendParams param = MakeSpeechAttachment(args, message, bot);
 
-            Functions.SendMessage(message, param,"", message.ChatId != null);
+            Functions.SendMessage(bot, message, param,"", message.ChatId != null);
 
         }
 
-        public static MessagesSendParams MakeSpeechAttachment(string text, Message message)
+        public static MessagesSendParams MakeSpeechAttachment(string text, Message message, Bot bot)
         {
             SpeechSynthesizer speechSynth = new SpeechSynthesizer(); // создаём объект
             speechSynth.Volume = 100; // устанавливаем уровень звука
             speechSynth.Rate = 2;
             //speechSynth.SelectVoice("Microsoft Pavel Mobile");
             Functions.RemoveSpaces(ref text);
+            string outFilename = String.Format(@"Data\SpeechText\{0}.waw", Guid.NewGuid());
             try
             {
-                speechSynth.SetOutputToWaveFile(FILENAME,
+                speechSynth.SetOutputToWaveFile(outFilename,
                                             new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
             }
             catch
@@ -70,17 +70,23 @@ namespace MyFunctions
             
             speechSynth.SetOutputToNull();
 
-            ConverWavToMp3();
+            string outFilenameMP3 = ConverWavToMp3(outFilename);
+            File.Delete(outFilename);
 
             List<Audio> audioList = new List<Audio>();
             try
             {
-                audioList.Add(UploadAndSave(text));
+                audioList.Add(UploadAndSave(text, outFilenameMP3, bot));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                if(ex.Message == "Access denied: filename is incorrect")
+                if (ex.Message == "Access denied: filename is incorrect")
                     throw new WrongParamsException("Текст аудиосообщения слишком короткий!");
+                else throw;
+            }
+            finally
+            {
+                File.Delete(outFilenameMP3);
             }
 
             MessagesSendParams param = new MessagesSendParams();
@@ -88,20 +94,21 @@ namespace MyFunctions
 
             return param;
         }
-        static Audio UploadAndSave(string title)
+        static Audio UploadAndSave(string title, string outFilenameMP3, Bot BOT)
         {
-            Uri uploadServer = BOT_API.GetApi().Audio.GetUploadServer();
+            Bot bot = BOT_API.Bots.ContainsKey(BOT_API.MainBot) ? BOT_API.Bots[BOT_API.MainBot] : BOT;
+            Uri uploadServer = bot.GetApi().Audio.GetUploadServer();
 
             var wc = new WebClient();
-            var response = Encoding.Default.GetString(wc.UploadFile(uploadServer.AbsoluteUri,FILENAMEMP3));
+            var response = Encoding.Default.GetString(wc.UploadFile(uploadServer.AbsoluteUri,outFilenameMP3));
 
             Audio savedAudio;
             string t = title.Substring(0, title.Length > 50 ? 50 : title.Length);
-            savedAudio = BOT_API.GetApi().Audio.Save(response, NAME, t);
+            savedAudio = bot.GetApi().Audio.Save(response, NAME, t);
 
             if (title.Length > 50)
             {
-                BOT_API.GetApi().Audio.Edit(savedAudio.Id.Value, BOT_API.GetApi().UserId.Value, NAME, t , title);
+                bot.GetApi().Audio.Edit(savedAudio.Id.Value, bot.GetApi().UserId.Value, NAME, t , title);
             }
 
             return savedAudio;
@@ -111,14 +118,17 @@ namespace MyFunctions
         public SpeechText()
         {
             AddMyCommandInPlatform();
+            if (!Directory.Exists(DIRECTORY_PATH)) Directory.CreateDirectory(DIRECTORY_PATH);
         }
 
-        static void ConverWavToMp3()
+        static string ConverWavToMp3(string outFilename)
         {
-            WaveStream InStr = new WaveStream(FILENAME);
+            WaveStream InStr = new WaveStream(outFilename);
+            string outFilenameMP3 = String.Format(@"Data\SpeechText\{0}.mp3", Guid.NewGuid()); 
             try
             {
-                Mp3Writer writer = new Mp3Writer(new FileStream(FILENAMEMP3,
+                
+                Mp3Writer writer = new Mp3Writer(new FileStream(outFilenameMP3,
                                                     FileMode.Create), InStr.Format);
                 try
                 {
@@ -138,26 +148,27 @@ namespace MyFunctions
             {
                 InStr.Close();
             }
+            return outFilenameMP3;
         }
 
-        public static bool NeedCommandInfo1(Message message, params object[] p)
+        public static bool NeedCommandInfoStatic(Message message, string args, Bot bot)
         {
             string info = $"Справка по команде \"{message.Body}\":\n\n" +
                 "Команда голосом бота озвучивает указанный в скобках текст.\n\n" +
-                $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(я тебя люблю, не знаю почему) - бот озвучит и отправит аудиозапись с озвученным текстом.\n\n" +
+                $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(я тебя люблю, не знаю почему) - бот озвучит и отправит аудиозапись с озвученным текстом.\n\n" +
                 $"Данная функция реализована с помощью The Microsoft Cognitive Toolkit (Speech)";
 
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {
-                Functions.SendMessage(message, info, message.ChatId != null);
+                Functions.SendMessage(bot, message, info, message.ChatId != null);
                 return true;
             }
             return false;
         }
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        bool IMyCommands.NeedCommandInfo(Message message, string args, Bot bot)
         {
-            throw new NotImplementedException();
+            return NeedCommandInfoStatic(message, args, bot);
         }
     }
 }

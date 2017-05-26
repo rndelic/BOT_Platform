@@ -22,13 +22,13 @@ namespace MyFunctions
 {
     class GifAnimation : IMyCommands
     {
-        private string IN_FILENAME = "Data\\Gif\\photo";
+        private const string DIRECTORY_PATH = @"Data\Gifs";
         private const int MAX_DELAY_LIMIT = 5000;
 
         public GifAnimation()
         {
             AddMyCommandInPlatform();
-
+            if (!Directory.Exists(DIRECTORY_PATH)) Directory.CreateDirectory(DIRECTORY_PATH);
         }
 
         public void AddMyCommandInPlatform()
@@ -36,96 +36,98 @@ namespace MyFunctions
             CommandsList.TryAddCommand("гиф", new MyComandStruct("Делает гифку из прикреплённых изображений", MakeGif));
         }
 
-        private void MakeGif(Message message, object[] p)
+        private void MakeGif(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
+            if (NeedCommandInfo(message, args, bot)) return;
 
             if (message.Attachments.Count <= 1)
             {
-                Functions.SendMessage(message, "Ну и из чего мне тебе гифку делать? Где картинки? Их должно быть не менее 2-х.", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Ну и из чего мне тебе гифку делать? Где картинки? Их должно быть не менее 2-х.", message.ChatId != null);
                 return;
             }
             Regex reg = new Regex(@"\d{0," + MAX_DELAY_LIMIT.ToString().Length + "}");
-            if (reg.Match(p[0].ToString()).Value != p[0].ToString() )
+            if (reg.Match(args).Value != args )
             {
-                Functions.SendMessage(message, $"Введено недопустимое значение! Введите целое число от 0 до {MAX_DELAY_LIMIT}.", message.ChatId != null);
+                Functions.SendMessage(bot, message, $"Введено недопустимое значение! Введите целое число от 0 до {MAX_DELAY_LIMIT}.", message.ChatId != null);
                 return;
             }
 
-            int maxCount = 0;
-            Parallel.For(0, message.Attachments.Count, i =>
+
+            Attachment[] photos = message.Attachments.Where(t => t.Instance is Photo).ToArray();
+            if (photos.Length == 0)
             {
-                Photo photo = ((message.Attachments[i].Instance) as Photo);
-                if (photo != null)
+                throw new WrongParamsException("Ну и из чего мне тебе гифку делать? Где картинки? Их должно быть не менее 2-х.");
+            }
+
+            Image[] images = new Image[photos.Length];
+
+            Parallel.For(0, photos.Length, i =>
+            {
+                Photo photo = (Photo) photos[i].Instance;
+                WebRequest request = null;
+                if (photo.Photo2560 != null) request = WebRequest.Create(photo.Photo2560);
+                else if (photo.Photo1280 != null) request = WebRequest.Create(photo.Photo1280);
+                else if (photo.Photo807 != null) request = WebRequest.Create(photo.Photo807);
+                else if (photo.Photo604 != null) request = WebRequest.Create(photo.Photo604);
+                else if (photo.Photo130 != null) request = WebRequest.Create(photo.Photo130);
+                else if (photo.Photo75 != null) request = WebRequest.Create(photo.Photo75);
+
+                var response = request.GetResponse();
+                Bitmap loadedBitmap = null;
+                using (var responseStream = response.GetResponseStream())
                 {
-                    WebClient webClient = new WebClient();
-                    if (photo.Photo2560 != null) webClient.DownloadFile(photo.Photo2560, IN_FILENAME + i + ".png");
-                    else if (photo.Photo1280 != null) webClient.DownloadFile(photo.Photo1280, IN_FILENAME + i + ".png");
-                    else if (photo.Photo807 != null) webClient.DownloadFile(photo.Photo807, IN_FILENAME + i + ".png");
-                    else if (photo.Photo604 != null) webClient.DownloadFile(photo.Photo604, IN_FILENAME + i + ".png");
-                    else if (photo.Photo130 != null) webClient.DownloadFile(photo.Photo130, IN_FILENAME + i + ".png");
-                    else if (photo.Photo75 != null) webClient.DownloadFile(photo.Photo75, IN_FILENAME + i + ".png");
-
-                    Image img = Image.FromFile(IN_FILENAME + i + ".png");
-                    SIZE_HEIGHT += img.Height;
-                    SIZE_WIDTH += img.Width;
-                    img.Dispose();
-                    Interlocked.Increment(ref maxCount);
+                    loadedBitmap = new Bitmap(responseStream);
                 }
-            });
-            ToGif(Convert.ToInt32(p[0]), maxCount);
+                images[i] = (Image) loadedBitmap;
 
+                SIZE_HEIGHT += images[i].Height;
+                SIZE_WIDTH += images[i].Width;
+            });
+            string outFilename = ToGif(Convert.ToInt32(args), images);
             List<Document> docList = new List<Document>();
-            docList.Add(Functions.UploadDocumentInMessage(OUTPUT_FILEPATH, $"gif{DateTime.Now.ToLocalTime()}"));
+
+            try
+            {
+                docList.Add(Functions.UploadDocumentInMessage(outFilename, $"gif{DateTime.Now.ToLocalTime()}", bot));
+            }
+            finally { File.Delete(outFilename); }
 
             MessagesSendParams param = new MessagesSendParams();
             param.Attachments = new ReadOnlyCollection<Document>(docList);
 
-            Functions.SendMessage(message, param, "", message.ChatId != null);
-            /*
-            Task.Run(() =>
-            {
-                Parallel.For(0, maxCount, i =>
-                {
-                    File.Delete(IN_FILENAME + i + ".png");
-                });
-                File.Delete(OUTPUT_FILEPATH);
-            });*/
+            Functions.SendMessage(bot, message, param, "", message.ChatId != null);
 
         }
 
         private int SIZE_HEIGHT = 0;
         private int SIZE_WIDTH = 0;
 
-        private void ToGif(int delay, int maxCount)
+        string ToGif(int delay, Image[] images)
         {
-            if (maxCount == 0)
-            {
-                throw  new WrongParamsException("Ну и из чего мне тебе гифку делать? Где картинки? Их должно быть не менее 2-х.");
-            }
             AnimatedGifEncoder e = new AnimatedGifEncoder();
-            e.Start(OUTPUT_FILEPATH);
+            string outFilename = String.Format(@"Data\Gifs\{0}.gif", Guid.NewGuid());
+            e.Start(outFilename);
             e.SetDelay(delay);
             //-1:no repeat,0:always repeat
             e.SetRepeat(0);
 
-            SIZE_HEIGHT = SIZE_HEIGHT / maxCount;
-            SIZE_WIDTH = SIZE_WIDTH / maxCount;
+            SIZE_HEIGHT = SIZE_HEIGHT / images.Length;
+            SIZE_WIDTH = SIZE_WIDTH / images.Length;
 
-            for (int i = 0, count = maxCount; i < count; i++)
+            for (int i = 0, count = images.Length; i < count; i++)
             {
-                Image im = Image.FromFile(IN_FILENAME + i + ".png");
-                im = new Bitmap(im, SIZE_WIDTH, SIZE_HEIGHT);
-                e.AddFrame(im);
-                im.Dispose();
+                images[i] = new Bitmap(images[i], SIZE_WIDTH, SIZE_HEIGHT);
+                e.AddFrame(images[i]);
+                images[i].Dispose();
             }
             e.Finish();
             e.SetDispose(0);
+
+            return outFilename;
         }
 
-        public string OUTPUT_FILEPATH = "Data\\Gif\\gif.gif";
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        public bool NeedCommandInfo(Message message, string args, Bot bot)
         {
             string info = info =
                 $"Справка по команде \"{message.Body}\":\n\n" +
@@ -133,9 +135,9 @@ namespace MyFunctions
 
                 $"Замечание: задержка представляет собой целое число от 0 до {MAX_DELAY_LIMIT} (до {MAX_DELAY_LIMIT / 1000} секунд)\n\nПример: бот, гиф(500)";
 
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {
-                Functions.SendMessage(message, info, message.ChatId != null);
+                Functions.SendMessage(bot, message, info, message.ChatId != null);
                 return true;
             }
             return false;

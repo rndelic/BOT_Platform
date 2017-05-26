@@ -6,6 +6,7 @@ using System.Threading;
 using VkNet.Model.RequestParams;
 using BOT_Platform.Interfaces;
 using System.Diagnostics;
+using System.IO;
 
 namespace BOT_Platform
 {
@@ -18,20 +19,58 @@ namespace BOT_Platform
             CommandsList.AddConsoleCommand("cls" , new MyComandStruct("Очистить консоль", ClearConsole));
             CommandsList.AddConsoleCommand("log", new MyComandStruct("Открывает лог", СLog));
             CommandsList.AddConsoleCommand("settings", new MyComandStruct("Открывает файл настроек", CSettings));
-            CommandsList.AddConsoleCommand("test", new MyComandStruct("Тест бота", CTest));
+            CommandsList.AddConsoleCommand("!", new MyComandStruct("Тест бота", CDebugCommand));
             CommandsList.AddConsoleCommand("restart", new MyComandStruct("Перезапуск системы", CRestart));
+            CommandsList.AddConsoleCommand("bots", new MyComandStruct("Список ботов", CBots));
             CommandsList.AddConsoleCommand("debug", new MyComandStruct("Активирует режим отладки", CDebug));
             CommandsList.AddConsoleCommand("undebug", new MyComandStruct("Деактивирует режим отладки", CDebug));
         }
 
-        private void CSettings(Message message, object[] p)
+        private void CDebugCommand(Message message, string args, Bot bot)
         {
-            Process.Start(PlatformSettings.DATA_FILENAME);
+            string[] param = args.Split(new char[] {','}, 2, StringSplitOptions.RemoveEmptyEntries);
+
+            if (!BOT_API.Bots.ContainsKey(param[0]))
+            {
+                Console.WriteLine($"Бот {param[0]} отсутствует в системе.\n");
+                return;
+            }
+            BOT_API.Bots[param[0]].DebugExecuteCommand(param[1]);
         }
 
-        private void СLog(Message message, object[] p)
+        private void CBots(Message message, string args, Bot Bot)
         {
-            Process.Start(CommandsList.Log.logFile);
+            StringBuilder sB = new StringBuilder();
+            sB.AppendLine("\n---------------------------------------------------------------------");
+            sB.AppendLine("Список загруженных ботов:");
+            foreach (var bot in BOT_API.Bots.Values)
+            {
+                                    sB.Append($"[{bot.Name}] - ");
+                if (bot is UserBot) sB.Append("Тип: UserBot, ");
+                else                sB.Append("Тип: GroupBot, ");
+                                    sB.AppendLine($"Статус IsDebug: {bot.GetSettings().GetIsDebug().ToString().ToUpper()} ");
+            }
+            sB.AppendLine("---------------------------------------------------------------------");
+            Console.WriteLine(sB.ToString());
+            
+        }
+
+        private void CSettings(Message message, string args, Bot bot)
+        {
+            if (bot == null && String.IsNullOrEmpty(args)) return;
+
+            if (BOT_API.Bots.ContainsKey(args))
+                Process.Start(Path.Combine(BOT_API.Bots[args].Directory, PlatfromSettings.PATH));
+            else Console.WriteLine($"Бот {args} отсутствует в системе.\n");
+        }
+
+        private void СLog(Message message, string args, Bot bot)
+        {
+            if (bot == null && String.IsNullOrEmpty(args)) return;
+
+            if (BOT_API.Bots.ContainsKey(args))
+                Process.Start(Path.Combine(BOT_API.Bots[args].Directory, CommandsList.Log.logFile));
+            else Console.WriteLine($"Бот {args} отсутствует в системе.\n");
         }
 
         public StandartCommands()
@@ -39,41 +78,84 @@ namespace BOT_Platform
             AddMyCommandInPlatform();
         }
 
-        void CDebug(Message message, params object[] p)
+        void SetDebug(Bot Bot)
         {
-            if (message.Body == "debug" && BOT_API.GetSettings().IsDebug == false)
+            void ThreadDebug(Bot bot)
             {
-                BOT_API.GetSettings().IsDebug = true;
-                Console.Title = "DEBUG VERSION";
+                bot.GetSettings().SetIsDebug(true);
                 Console.WriteLine(
                     "---------------------" +
-                    "Решим отладки ВКЛЮЧЁН(ON)" +
+                    $"Решим отладки бота [{bot.Name}] ВКЛЮЧЁН(ON)" +
                     "---------------------");
             }
-
-            else if (message.Body == "undebug")
+            if (Bot != null)
             {
-                BOT_API.GetSettings().IsDebug = false;
-                if (BOT_API.botThread != null)
+               ThreadDebug(Bot);
+            }
+            else
+            {
+                foreach (var bot in BOT_API.Bots.Values)
                 {
-
-                    BOT_API.botThread.Abort("Перезапуск потока botThread");
-                    Console.WriteLine("Перезапуск потока botThread");
+                    ThreadDebug(bot);
                 }
+            }
 
-                BOT_API.botThread = new Thread(BOT_API.BotWork)
+        }
+        void SetUndebug(Bot Bot)
+        {
+            void UndebugThread(Bot bot)
+            {
+                bot.GetSettings().SetIsDebug(false);
+                Thread abortThread = bot.botThread;
+
+                bot.botThread = new Thread(bot.BotWork)
                 {
-                    Priority = ThreadPriority.AboveNormal
+                    Priority = ThreadPriority.AboveNormal,
+                    Name = bot.Name
                 };
-                BOT_API.botThread.Start();
-                Console.Title = "ACTIVE VERSION";
-                Console.WriteLine(
-                    "---------------------" +
-                    "Решим отладки ВЫКЛЮЧЕН(OFF)" +
-                    "---------------------");
+
+                bot.botThread.Start();
+                if (abortThread != null)
+                {
+                    Console.WriteLine($"Перезапуск потока botThread в [{bot.Name}]");
+                    Console.WriteLine(
+                        "---------------------" +
+                        $"Решим отладки бота [{bot.Name}] ВЫКЛЮЧЕН(OFF)" +
+                        "---------------------");
+                    abortThread.Abort($"Перезапуск потока botThread в [{bot.Name}]");
+                }
+            }
+
+            if (Bot != null)
+            {
+                UndebugThread(Bot);
+            }
+            else
+            {
+                foreach (var bot in BOT_API.Bots.Values)
+                {
+                    UndebugThread(bot);
+                }
             }
         }
-        void CRestart(Message message, params object[] p)
+        void CDebug(Message message, string args, Bot Bot)
+        {
+
+            Bot = String.IsNullOrEmpty(args) ? Bot : 
+                (BOT_API.Bots.ContainsKey(args) ? BOT_API.Bots[args] 
+                : throw new ArgumentException($"Бот {args} отсутствует в системе."));
+
+            if (message.Body == "debug")
+            {
+                SetDebug(Bot);
+            }
+            
+            else if (message.Body == "undebug")
+            {
+                SetUndebug(Bot);
+            }
+        }
+        void CRestart(Message message, string args, Bot bot)
         {
             Thread needToAbortThread = BOT_API.consoleThread;
             BOT_API.consoleThread = new Thread(BOT_API.ConsoleCommander)
@@ -81,20 +163,15 @@ namespace BOT_Platform
                 Priority = ThreadPriority.Highest
             };
             BOT_API.consoleThread.Start();
-            if(needToAbortThread != null) needToAbortThread.Abort("Платформа была перезапущена!");
+            if (needToAbortThread != null)
+            {
+                Console.WriteLine("Платформа была перезапущена!");
+                needToAbortThread.Abort("Платформа была перезапущена!");
+            }
             
         }
-        void CTest(Message message, params object[] p)
-        {
-            Message m = new Message()
-            {
-                UserId = BOT_API.GetApi().UserId,
-                ChatId = null
-            };
-            Functions.SendMessage(m, "Test");
-            Console.WriteLine("Успешно.");
-        }
-        void CShowCommands(Message message, params object[] p)
+
+        void CShowCommands(Message message, string args, Bot bot)
         {
             List<string> com = CommandsList.GetCommandList();
             Console.WriteLine("\n------------------Список команд------------------");
@@ -104,11 +181,11 @@ namespace BOT_Platform
             }
             Console.WriteLine("-------------------------------------------------\n");
         }
-        void CExit(Message message, params object[] p)
+        void CExit(Message message, string args, Bot bot)
         {
             Environment.Exit(1);
         }
-        void ClearConsole(Message message, params object[] p)
+        void ClearConsole(Message message, string args, Bot bot)
         {
             Console.Clear();
         }

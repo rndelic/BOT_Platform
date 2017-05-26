@@ -12,21 +12,28 @@ namespace BOT_Platform
     {
         public static class Log
         {
-            public static readonly string logFile = "Data\\BotData\\log.txt";
+            static Log()
+            {
+                if (!Directory.Exists(DIRECTORY_PATH)) Directory.CreateDirectory(DIRECTORY_PATH);
+            }
+
+            private const string DIRECTORY_PATH = @"Data\System";
+            public static readonly string logFile = DIRECTORY_PATH + @"\log.txt";
             static object lockObj = new object();
-            static void InLog(object text)
+            static void InLog(object text, string filePath)
             {
                 lock(lockObj)
                 {
-                    using (StreamWriter sw = new StreamWriter(logFile, true))
+                    using (StreamWriter sw = new StreamWriter(filePath, true))
                     {
                         sw.Write(text.ToString());
                     }
                 }
             }
-            public static void WriteLog(string text)
+            public static void WriteLog(string text, string botFilePath)
             {
-                Task.Run(()=> InLog(text));
+                botFilePath = botFilePath + $@"\{logFile}";
+                Task.Run(()=> InLog(text, botFilePath));
             }
         }
     }

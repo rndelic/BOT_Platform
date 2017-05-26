@@ -9,6 +9,7 @@ using BOT_Platform;
 using System.Text.RegularExpressions;
 using VkNet.Enums.SafetyEnums;
 using BOT_Platform.Interfaces;
+using MyFunctions.Exceptions;
 
 namespace MyFunctions
 {
@@ -39,7 +40,7 @@ namespace MyFunctions
         {
             AddMyCommandInPlatform();
         }
-        void ShowCommands(Message message, params object[] p)
+        void ShowCommands(Message message, string args, Bot bot)
         {
             List<string> com = CommandsList.GetCommandList(true);
             StringBuilder sb = new StringBuilder();
@@ -47,21 +48,21 @@ namespace MyFunctions
 
             foreach (string value in com)
             {
-                sb.Append(BOT_API.GetSettings().BotName[0] + ", " + value + "\n");
+                sb.Append(bot.GetSettings().BotName[0] + ", " + value + "\n");
             }
 
-            Functions.SendMessage(message, sb.ToString(), message.ChatId != null);
+            Functions.SendMessage(bot, message, sb.ToString(), message.ChatId != null);
         }
-        void Solve(Message message, params object[] p)
+        void Solve(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
-            Functions.SendMessage(message, SolveExample(p[0].ToString()), message.ChatId != null);
+            if (NeedCommandInfo(message, args, bot)) return;
+            Functions.SendMessage(bot, message, SolveExample(args), message.ChatId != null);
         }
 
-        void Like(Message message, params object[] p)
+        void Like(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
-            string http = p[0].ToString();
+            if (NeedCommandInfo(message, args, bot)) return;
+            string http = args.ToString();
 
             string foundPhoto = "photo";
             string foundWall  = "wall";
@@ -99,126 +100,112 @@ namespace MyFunctions
             };
             try
             {
-                BOT_API.GetApi().Likes.Add(lAP);
+                if (bot is GroupBot)
+                {
+                    if (BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                        BOT_API.Bots[BOT_API.MainBot].GetApi().Likes.Add(lAP);
+                    else
+                        throw new WrongParamsException(
+                            "В данный момент бот не может лайкать ваши записи ;c");
+                }
+
+                else bot.GetApi().Likes.Add(lAP);
             }
             catch (VkNet.Exception.VkApiException ex)
             {
-                Functions.SendMessage(message, "К сожалению, обьект находится в частном доступе :/", message.ChatId != null);
+                Functions.SendMessage(bot, message, "К сожалению, обьект находится в частном доступе :/", message.ChatId != null);
                 return;
             }
 
-            Functions.SendMessage(message, "👌", message.ChatId != null);
+            Functions.SendMessage(bot, message, "👌", message.ChatId != null);
         }
 
-        void What(Message message, params object[] p)
+        void What(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
-            string[] param = p[0].ToString().Split(new char[1] { ',' }, StringSplitOptions.None);
+            if (NeedCommandInfo(message, args, bot)) return;
+            string[] param = args.Split(new char[1] { ',' }, StringSplitOptions.None);
             Random rand = new Random();
 
-            Functions.SendMessage(message, param[rand.Next(0, param.Length)], message.ChatId != null);
+            Functions.SendMessage(bot, message, param[rand.Next(0, param.Length)], message.ChatId != null);
         }
 
-        void Support(Message message, params object[] p)
+        void Support(Message message, string args, Bot bot)
         {
-            Functions.SendMessage(message, "https://vk.com/dedsec_alexberezhnyh", message.ChatId != null);
+            Functions.SendMessage(bot, message, "https://vk.com/dedsec_alexberezhnyh", message.ChatId != null);
         }
 
-        void BRandom(Message message, params object[] p)
+        void BRandom(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
+            if (NeedCommandInfo(message, args, bot)) return;
             Random rand = new Random();
-            if(p[0] == null) Functions.SendMessage(message, "🎲 " + rand.Next().ToString(), message.ChatId != null);
+            if(args == null) Functions.SendMessage(bot, message, "🎲 " + rand.Next().ToString(), message.ChatId != null);
             else
             {
-                string[] param = p[0].ToString().Split(new char[1]{ ',' }, 2, StringSplitOptions.RemoveEmptyEntries); 
+                string[] param = args.Split(new char[1]{ ',' }, 2, StringSplitOptions.RemoveEmptyEntries); 
                 if(param.Length == 1)
-                    Functions.SendMessage(message, "🎲 " + rand.Next(Convert.ToInt32(param[0])+1).ToString(), message.ChatId != null);
+                    Functions.SendMessage(bot, message, "🎲 " + rand.Next(Convert.ToInt32(param[0])+1).ToString(), message.ChatId != null);
                 else
-                    Functions.SendMessage(message, "🎲 " + rand.Next(Convert.ToInt32(param[0]), Convert.ToInt32(param[1])+1).ToString(), message.ChatId != null);
+                    Functions.SendMessage(bot, message, "🎲 " + rand.Next(Convert.ToInt32(param[0]), Convert.ToInt32(param[1])+1).ToString(), message.ChatId != null);
             }
         }
 
-        void Say(Message message, params object[] p)
+        void Say(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
-            string text = Functions.RemoveSpaces(p[0].ToString());
+            if (NeedCommandInfo(message, args, bot)) return;
+            string text = Functions.RemoveSpaces(args);
             if (text[0] == '!' && text.Length >= 2)
             {
                 string textToSpeech = text.Substring(1);
                 if(!String.IsNullOrWhiteSpace(textToSpeech))
-                    SpeechText.Speech(message, textToSpeech);
+                    SpeechText.Speech(message, textToSpeech, bot);
 
-                else Functions.SendMessage(message, text, message.ChatId != null);
+                else Functions.SendMessage(bot, message, text, message.ChatId != null);
             }
-            else Functions.SendMessage(message, text, message.ChatId != null);
+            else Functions.SendMessage(bot, message, text, message.ChatId != null);
         }
 
-        void AnonimSend(Message message, params object[] p)
+        void AnonimSend(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
-            string[] param = p[0].ToString().Split(new char[1] { ',' }, 2, StringSplitOptions.None);
+            if (NeedCommandInfo(message, args, bot)) return;
+            string[] param = args.Split(new char[1] { ',' }, 2, StringSplitOptions.None);
 
             long? answerId = message.UserId;
+
+            if (message.Attachments.Count != 0 && param.Length == 1)
+            {
+                param = new string[] {param[0], "[тут должно быть вложение, если его не оказалось - произошла непредвиденная ошибка]" };
+            }
             Functions.RemoveSpaces(ref param[1]);
 
             if (param[0].Contains("\""))
             {
-                AnonChat.ChatSend(message, param[0], param[1]);
+                AnonChat.ChatSend(message, param[0], param[1], bot);
                 return;
             }
-            #region
-            /*
-            param[0] = param[0].Replace(" ", "");
-            int index = param[0].ToString().LastIndexOf('/');
-            if (index != -1) param[0] = param[0].ToString().Substring(index + 1);
-            
-            Regex reg = new Regex("[a-z|A-Z]");
-            bool regexIsFoundInFull = reg.IsMatch(param[0]);
 
-            //Если нашёл "id"
-            index = param[0].ToString().IndexOf("id");
-            if (index == 0)
-            {
-                if (!reg.IsMatch(param[0].ToString().Substring(2)))
-                {
-                    param[0] = param[0].ToString().Substring(2);
-                }
-                else
-                {
-                    param[0] = BOT_API.GetApi().Users.Get(param[0]).Id.ToString();
-                }
-            }
-
-            else if (reg.IsMatch(param[0]))
-            {
-                param[0] = BOT_API.GetApi().Users.Get(param[0]).Id.ToString();
-            }
-            */
-            #endregion
-            Functions.GetUserId(ref param[0]);
+            Functions.GetUserId(ref param[0], bot);
             message.UserId = Convert.ToInt32(param[0]); ;
 
             try
             {
                 if (param[1][0] != '!')
-                    Functions.SendMessage(message, "Служба анонимной почты, вам письмо:\n" + param[1]);
+                    Functions.SendMessage(bot, message, "Служба анонимной почты, вам письмо:\n" + param[1], false, true);
                 
                 else
                 {
-                    Functions.SendMessage(message, SpeechText.MakeSpeechAttachment(param[1].Substring(1), message),
+                    Functions.SendMessage(bot, message, SpeechText.MakeSpeechAttachment(param[1].Substring(1), message, bot),
                         "Служба анонимной почты, вам аудиосообщение:\n");
                 }   
             }
             catch (VkNet.Exception.VkApiException ex)
             {
                 message.UserId = answerId;
-                Functions.SendMessage(message, "К сожалению, я не могу отправить сообщение этому человеку.\n" +
+                Functions.SendMessage(bot, message, "К сожалению, я не могу отправить сообщение этому человеку.\n" +
                                      "Такие дела ¯\\_(ツ)_/¯.", message.ChatId != null);
                 return;
             }
             message.UserId = answerId;
-            Functions.SendMessage(message, "Доставлено!", message.ChatId!=null);
+            Functions.SendMessage(bot, message, "Доставлено!", message.ChatId!=null);
             }
 
         /* Этот говнкод я писал оооочень давно */
@@ -526,7 +513,7 @@ namespace MyFunctions
 
         }
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        public bool NeedCommandInfo(Message message, string args, Bot bot)
         {
             string info = "";
             switch (message.Body)
@@ -535,12 +522,12 @@ namespace MyFunctions
                     info =
                     $"Справка по команде \"{message.Body}\":\n\n" +
                     "Команда отправляет пользователю анонимное сообщение, где не будет указано, от кого оно.\n\n" +
-                    $"Для того, чтобы отправить сообщение пользователю, напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}(ссылка или id пользователя, текст сообщения)\n" +
-                    $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(vk.com/hello_bot, привет)\n" +
+                    $"Для того, чтобы отправить сообщение пользователю, напишите {bot.GetSettings().BotName[0]}, {message.Body}(ссылка или id пользователя, текст сообщения)\n" +
+                    $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(vk.com/hello_bot, привет)\n" +
                     $"Пользователь получит сообщение: \n" +
                     $"Служба анонимной почты, вам письмо: привет\n\n" +
-                    $"Для того, чтобы отправить аудиосообщение пользователю, напишите {BOT_API.GetSettings().BotName[0]}, {message.Body}(ссылка или id пользователя, !текст сообщения) - поставьте ! перед текстом сообщения\n" +
-                    $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(vk.com/hello_bot, !привет)\n" +
+                    $"Для того, чтобы отправить аудиосообщение пользователю, напишите {bot.GetSettings().BotName[0]}, {message.Body}(ссылка или id пользователя, !текст сообщения) - поставьте ! перед текстом сообщения\n" +
+                    $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(vk.com/hello_bot, !привет)\n" +
                     $"Пользователь получит сообщение: \n" +
                     $"Служба анонимной почты, вам аудиосообщение: *{SpeechText.NAME} - привет* <- аудиозапись.\n\n" +
                     $"ВНИМАНИЕ! Если сообщение было успешно доставлено, бот ответит вам \"Доставлено!\"";
@@ -550,7 +537,7 @@ namespace MyFunctions
                     info =
                     $"Справка по команде \"{message.Body}\":\n\n" +
                     "Бот вычисляет математическое выражение (в том числе длинную дробную арифметику) со стандартными операциями (+-*/), указанное в скобках.\n\n" +
-                    $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}( ((25/5) - 3) *2) )\n" +
+                    $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}( ((25/5) - 3) *2) )\n" +
                     $"Пользователь получит ответ: 4\n\n" +
                     "Обратите внимание, вне зависимости от того, есть ли в выражении свои скобки или нет  (25/5) - 3) * 2, всё выражение должно быть указано в главных скобках:  ((25/5) - 3) * 2)";
                     break;
@@ -558,9 +545,9 @@ namespace MyFunctions
                     info = $"Справка для команды \"{message.Body}\" отсутствует. Обратитесь к разработчику: https://vk.com/dedsec_alexberezhnyh";
                     break;
             }
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {
-                Functions.SendMessage(message, info, message.ChatId != null);
+                Functions.SendMessage(bot, message, info, message.ChatId != null);
                 return true;
             }
             return false;

@@ -20,19 +20,17 @@ namespace MyFunctions
 {
     class Mems: IMyCommands
     {
-        const string OUT_FILENAME = "Data\\out_mem.jpg";
-        const string IN_FILENAME = "Data\\in_mem.jpg";
+        private const string DIRECTORY_PATH = @"Data\Mems";
         public void AddMyCommandInPlatform()
         {
             CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
         }
-        private void MakeMem(Message message, object[] p)
+        private void MakeMem(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
+            if (NeedCommandInfo(message, args, bot)) return;
 
             List<Photo> photoList = new List<Photo>();
-            var webClient = new WebClient();
-            string[] text = p[0].ToString().Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries)
+            string[] text = args.Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries)
                                            .Reverse().ToArray();
 
             if(text.Length == 0 || String.IsNullOrWhiteSpace(text[0]) ||
@@ -41,47 +39,52 @@ namespace MyFunctions
                                    ( text.Length == 2 && (String.IsNullOrWhiteSpace(text[1]) || 
                                    String.IsNullOrEmpty(text[1]))))
             {
-                Functions.SendMessage(message, "Подпись не может содержать пустые строки :/", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Подпись не может содержать пустые строки :/", message.ChatId != null);
                 return;
             }
 
             if (message.Attachments.Count == 0)
             {
-                Functions.SendMessage(message, "Ну и на чём мне твои анекдоты писать? Где картинка?", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Ну и на чём мне твои анекдоты писать? Где картинка?", message.ChatId != null);
                 return;
             }
             if (message.Attachments.Count > 1)
             {
-                Functions.SendMessage(message, "А не многовато ли картинок? Оставь одну, и, так уж и быть, я сделаю тебе мемасик.", message.ChatId != null);
+                Functions.SendMessage(bot, message, "А не многовато ли картинок? Оставь одну, и, так уж и быть, я сделаю тебе мемасик.", message.ChatId != null);
                 return;
             }
 
             Photo photo = ((message.Attachments[0].Instance) as Photo);
             if (photo == null)
             {
-                Functions.SendMessage(message, "Прикрепи изображение!", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Прикрепи изображение!", message.ChatId != null);
                 return;
             }
-                    if      (photo.Photo2560 != null) webClient.DownloadFile(photo.Photo2560, IN_FILENAME);
-                    else if (photo.Photo1280 != null) webClient.DownloadFile(photo.Photo1280, IN_FILENAME);
-                    else if (photo.Photo807  != null) webClient.DownloadFile(photo.Photo807,  IN_FILENAME);
-                    else if (photo.Photo604  != null) webClient.DownloadFile(photo.Photo604,  IN_FILENAME);
-                    else if (photo.Photo130  != null) webClient.DownloadFile(photo.Photo130,  IN_FILENAME);
-                    else if (photo.Photo75   != null) webClient.DownloadFile(photo.Photo75,   IN_FILENAME);
 
-                    webClient.Dispose();
-                    DrawAndSave(text);
-                    photoList.Add(Functions.UploadImageInMessage(OUT_FILENAME));
+            WebRequest request = null;
+            if      (photo.Photo2560 != null) request = WebRequest.Create(photo.Photo2560);
+            else if (photo.Photo1280 != null) request = WebRequest.Create(photo.Photo1280);
+            else if (photo.Photo807 != null)  request = WebRequest.Create(photo.Photo807);
+            else if (photo.Photo604 != null)  request = WebRequest.Create(photo.Photo604);
+            else if (photo.Photo130 != null)  request = WebRequest.Create(photo.Photo130);
+            else if (photo.Photo75 != null)   request = WebRequest.Create(photo.Photo75);
 
-                    Upload(message, photoList);
+            var response = request.GetResponse();
+            Bitmap loadedBitmap = null;
+            using (var responseStream = response.GetResponseStream())
+            {
+                loadedBitmap = new Bitmap(responseStream);
+            }
+            string outFilename = DrawAndSave((Image)loadedBitmap, text);
+            loadedBitmap.Dispose();
 
-                    File.Delete(OUT_FILENAME);
-                    File.Delete(IN_FILENAME);
+            photoList.Add(Functions.UploadImageInMessage(outFilename, bot));
+            Upload(message, photoList, bot);
+            File.Delete(outFilename);
         }
 
-        void DrawAndSave(string[] text, float mlp = 1.1f)
+        string DrawAndSave(Image image, string[] text, float mlp = 1.1f)
         {
-            Image image = Image.FromFile(IN_FILENAME);
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             const string FONT_NAME = "Arial Black";
@@ -147,33 +150,36 @@ namespace MyFunctions
 
                 //g.Flush(FlushIntention.Sync);
             }
+            string outFilename = String.Format(@"Data\Mems\{0}.png", Guid.NewGuid());
 
             graphics.Dispose();
-            image.Save(OUT_FILENAME);
+            image.Save(outFilename);
             image.Dispose();
+
+            return outFilename;
         }
-        void Upload(Message message, List<Photo> photoList)
+        void Upload(Message message, List<Photo> photoList, Bot bot)
         {
 
             MessagesSendParams param = new MessagesSendParams();
             param.Attachments = new ReadOnlyCollection<Photo>(photoList);
 
-            Functions.SendMessage(message, param, "", message.ChatId != null);
+            Functions.SendMessage(bot, message, param, "", message.ChatId != null);
         }
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        public bool NeedCommandInfo(Message message, string args, Bot bot)
         {
             string info = $"Справка по команде \"{message.Body}\":\n\n" +
                "Бот комбинирует текст, указанный в скобках, и прикреплённое сообщение.\n\n" +
                "Учтите, что прикреплять нужно одно изображение, а текст не должен быть намного длиннее ширины изображения, иначе бот выдаст ошибку.\n\n" +
                "Для того, чтобы текст был написан лишь на нижней части изображения, напишите его в скобках без разделителя ,(запятой).\n" +
-               $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(когда купил айфон) - бот отправит картинку с текстом внизу.\n\n" +
+               $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(когда купил айфон) - бот отправит картинку с текстом внизу.\n\n" +
                "Для того, чтобы текст был написан и сверху картинки, и снизу, поставьте в нужном месте запятую (если по какой-то причине запятых в тексте несколько, за разделитель бот примет самую первую (,)запятую.\n" +
-               $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(когда купил айфон, но понял, что любишь андроид) - внизу будет написано \"когда купил айфон\", а внизу - \"но понял, что люишь андроид\". Разделитель в изображение не попадает.";
+               $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(когда купил айфон, но понял, что любишь андроид) - внизу будет написано \"когда купил айфон\", а внизу - \"но понял, что люишь андроид\". Разделитель в изображение не попадает.";
 
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {
-                Functions.SendMessage(message, info, message.ChatId != null);
+                Functions.SendMessage(bot, message, info, message.ChatId != null);
                 return true;
             }
             return false;
@@ -182,6 +188,7 @@ namespace MyFunctions
         public Mems()
         {
             AddMyCommandInPlatform();
+            if (!Directory.Exists(DIRECTORY_PATH)) Directory.CreateDirectory(DIRECTORY_PATH);
         }
     }
 }

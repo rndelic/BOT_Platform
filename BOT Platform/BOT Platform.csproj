@@ -125,6 +125,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Kernel\Bots.cs" />
     <Compile Include="InDevelop%28alfa%29\CommandDetector.cs" />
     <Compile Include="Develop Functions\Delelop Libs\Gif\AnimatedGifEncoder.cs" />
     <Compile Include="Develop Functions\AnonChat.cs" />
@@ -143,7 +144,6 @@
     <Compile Include="Kernel\Interfaces\IMyCommands.cs" />
     <Compile Include="Kernel\Interfaces\Mail.cs" />
     <Compile Include="Kernel\Interfaces\MysqlData.cs" />
-    <Compile Include="Kernel\Interfaces\SafeTimer.cs" />
     <Compile Include="Develop Functions\Delelop Libs\LibsCS\Lame.cs" />
     <Compile Include="Develop Functions\Delelop Libs\LibsCS\Mp3Writer.cs" />
     <Compile Include="Develop Functions\Delelop Libs\LibsCS\Mp3WriterConfig.cs" />
@@ -158,6 +158,7 @@
     <Compile Include="Develop Functions\Translate.cs" />
     <Compile Include="Kernel\WatchDogNET.cs" />
     <Compile Include="Develop Functions\Reviews.cs" />
+    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

@@ -1,7 +1,33 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BOT_Platform.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="SettingsTemplateUserBot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">@"[LOGIN]	   
+[PASSWORD] 
+[APP_ID]  	$id приложения $
+
+[MCOUNT]    $максимальное количество сообщений, принимаемое ботом за раз$
+[MTOFF]   	$максимальный период приянытх сообщений$
+
+[PAUSE]     1000
+[BNAME]     бот, Бот
+[BMESMEM]   30
+
+[ADMIN_LIST] "</Value>
+    </Setting>
+    <Setting Name="SettingsTemplateGroupBot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">@"[TOKEN]	   
+[APP_ID]   	$id приложения $
+
+[PAUSE]     1000
+[MCOUNT]    50	  	$максимальное количество сообщений, принимаемое ботом за раз$
+[MTOFF]     15		$максимальный период приянытх сообщений$
+
+[BNAME]    бот,Бот
+[BMESMEM]  30
+
+[ADMIN_LIST] "</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

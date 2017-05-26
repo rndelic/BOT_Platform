@@ -20,11 +20,11 @@ namespace MyFunctions
            CommandsList.TryAddCommand("найди", new MyComandStruct("найди(группа, список ключевых слов в постах)", Find));
         }
 
-        void Find(Message message, params object[] p)
+        void Find(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p)) return;
+            if (NeedCommandInfo(message, args, bot)) return;
             #region
-            string[] param = p[0].ToString().Split(new char[1] { ',' }, 2, StringSplitOptions.None);
+            string[] param = args.Split(new char[1] { ',' }, 2, StringSplitOptions.None);
 
             string[] data = param[0].Split('=');
             string domain = string.Empty;
@@ -52,14 +52,14 @@ namespace MyFunctions
 
             if (indexClub != -1) finalID = -Convert.ToInt32(domain.Substring(club.Length));
             else if (publicIndex != -1) finalID = -Convert.ToInt32(domain.Substring(publicC.Length));
-            else                {finalID = -BOT_API.GetApi().Groups.GetById(new string[1] { domain })[0].Id; }
+            else                {finalID = -bot.GetApi().Groups.GetById(new string[1] { domain })[0].Id; }
 
             StringBuilder sB = new StringBuilder();
             sB.Append("[https://vk.com/wall");
             sB.Append(finalID );
             sB.Append("?owners_only=1&q=");
             sB.Append(Functions.CheckURL(param[1]) + "]");
-            Functions.SendMessage(message, sB.ToString(), message.ChatId != null);
+            Functions.SendMessage(bot, message, sB.ToString(), message.ChatId != null);
 
         }
 
@@ -73,19 +73,19 @@ namespace MyFunctions
             }
         }
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        public bool NeedCommandInfo(Message message, string args, Bot bot)
         {
             string info = info =
                 $"Справка по команде \"{message.Body}\":\n\n" +
                "Бот ищет в группе, указанной в скобках (ссылке на группу), все посты, содержащие заданными ключевые слова/словосочетания/предложения.\n\n" +
 
-               $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(https://vk.com/panda.panda, красные панды) - " +
+               $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(https://vk.com/panda.panda, красные панды) - " +
                $"бот отправит ссылку на все посты, где упоминается \"красные панды\".\n" +
                $"Пример ответа для данного запроса:\n[https://vk.com/wall-29439161?owners_only=1&q=%20%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D1%8B%D0%B5%20%D0%BF%D0%B0%D0%BD%D0%B4%D1%8B]";
 
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {
-                Functions.SendMessage(message, info, message.ChatId != null);
+                Functions.SendMessage(bot, message, info, message.ChatId != null);
                 return true;
             }
             return false;

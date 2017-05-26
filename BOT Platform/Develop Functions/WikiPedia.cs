@@ -17,11 +17,11 @@ namespace MyFunctions
             CommandsList.TryAddCommand("вики", new MyComandStruct("Находит статью в википедии по запросу", FindWiki));
         }
 
-        private void FindWiki(Message message, object[] p)
+        private void FindWiki(Message message, string args, Bot bot)
         {
-            if (NeedCommandInfo(message, p) == true) return;
+            if (NeedCommandInfo(message, args, bot) == true) return;
 
-            string request = Functions.CheckURL(p[0].ToString());
+            string request = Functions.CheckURL(args);
 
             var webClient = new WebClient();
             string local = "ru";
@@ -36,7 +36,7 @@ namespace MyFunctions
 
             if (fnode == null)
             {
-                Functions.SendMessage(message, "Не удалось найти статью по заданной теме! Проверьте правильность написания запроса :(\n\n" +
+                Functions.SendMessage(bot, message, "Не удалось найти статью по заданной теме! Проверьте правильность написания запроса :(\n\n" +
                     "Обратите внимание, что имена собственные рекомендуется писать с заглавной буквы.", message.ChatId != null);
                 return;
             }
@@ -50,20 +50,20 @@ namespace MyFunctions
             if (ss.Length > 4096) ss = ss.Substring(0, 4000) + "...";
             ss += "\n\nПодробнее: " + "https://ru.wikipedia.org/wiki/" + request;
 
-            Functions.SendMessage(message, ss, message.ChatId != null);
+            Functions.SendMessage(bot, message, ss, message.ChatId != null);
 
         }
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        public bool NeedCommandInfo(Message message, string args, Bot bot)
         {
             string info = $"Справка по команде \"{message.Body}\":\n\n" +
                 "Команда находит статью в Википедии по заданному в скобках тексту.\n\n" +
                 "Обратите внимание, что имена собственные рекомендуется писать с заглавной буквы.\n\n" +
-                $"Пример: {BOT_API.GetSettings().BotName[0]}, {message.Body}(Галилео Галилей) - бот найдёт и отправит статью о Галилее в Википедии";
+                $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(Галилео Галилей) - бот найдёт и отправит статью о Галилее в Википедии";
 
-            if (p[0] == null || String.IsNullOrEmpty(p[0].ToString()) || String.IsNullOrWhiteSpace(p[0].ToString()))
+            if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {
-                Functions.SendMessage(message, info , message.ChatId != null);
+                Functions.SendMessage(bot, message, info , message.ChatId != null);
                 return true;
             }
             return false;

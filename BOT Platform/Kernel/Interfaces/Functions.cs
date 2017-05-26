@@ -1,10 +1,14 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using MyFunctions.Exceptions;
 using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
@@ -13,7 +17,7 @@ namespace BOT_Platform.Interfaces
 {
     static class Functions
     {
-                public static void RemoveSpaces(ref string str)
+        public static void RemoveSpaces(ref string str)
         {
             //удаляем пробелы с начала
             while (!string.IsNullOrEmpty(str) && str[0] == ' ')
@@ -45,36 +49,125 @@ namespace BOT_Platform.Interfaces
             return str;
         }
         
-        public static void SendMessage(Message message, MessagesSendParams m, string body, bool isChat = false)
+        public static void SendMessage(Bot bot, Message message, MessagesSendParams m, 
+            string body, bool isChat = false, bool needAttachments = false)
         {
+
             m.Message = body;
             if (isChat == true)
             {
                 m.ChatId = message.ChatId;
                 m.ForwardMessages = new long[1] { message.Id.Value };
+                //m.Attachments = needAttachments ? GetAttachments(message) : null;
             }
             else m.UserId = message.UserId;
 
-            if (BOT_API.GetSettings().IsDebug == false) BOT_API.GetApi().Messages.Send(m);
-            else Console.WriteLine(m.Message);
-        }
-        public static void SendMessage(Message m, string message, bool isChat = false)
-        {
-            MessagesSendParams msp = new MessagesSendParams()
+            if (bot.GetSettings().GetIsDebug() == false)
             {
+                if (bot is GroupBot && BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                {
+                    try
+                    {
+                        bot.GetApi().Messages.Send(m);
+                    }
+                    catch
+                    {
+                        SendMessage(BOT_API.Bots[BOT_API.MainBot], message, m, body, isChat, needAttachments);
+                    }
+                }
+                else bot.GetApi().Messages.Send(m);
+            }
+            else Console.WriteLine($"(ответ){bot.Name}: " +  m.Message);
+        }
+
+        private static List<MediaAttachment> GetAttachments(Message m)
+        {
+            List<MediaAttachment> mediaAttachments = new List<MediaAttachment>();
+            foreach (var attach in m.Attachments)
+            {
+                MediaAttachment mAt;
+                if (attach.Instance is Photo)
+                {
+                    mAt = (attach.Instance as Photo);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Audio)
+                {
+                    mAt = (attach.Instance as Audio);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Document)
+                {
+                    mAt = (attach.Instance as Document);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Sticker)
+                {
+                    mAt = (attach.Instance as Sticker);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Video)
+                {
+                    mAt = (attach.Instance as Video);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Link)
+                {
+                    mAt = (attach.Instance as Link);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Poll)
+                {
+                    mAt = (attach.Instance as Poll);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is Wall)
+                {
+                    mAt = (attach.Instance as Wall);
+                    mediaAttachments.Add(mAt);
+                }
+                else if (attach.Instance is WallReply)
+                {
+                    mAt = (attach.Instance as WallReply);
+                    mediaAttachments.Add(mAt);
+                }
+
+            }
+            return mediaAttachments;
+        }
+        public static void SendMessage(Bot bot, Message m,
+            string message, bool isChat = false, bool needAttachments = false)
+        {
+
+            MessagesSendParams msp = new MessagesSendParams()
+            { 
                 Message = message,
-                Attachments = m.Attachments as IEnumerable<MediaAttachment>
+                Attachments = needAttachments ? GetAttachments(m) : null
             };
 
-            if (isChat == true)
+            if (isChat)
             {
                 msp.ChatId = m.ChatId;
                 msp.ForwardMessages = new long[1] { m.Id.Value };
             }
             else msp.UserId = m.UserId;
 
-            if (BOT_API.GetSettings().IsDebug == false) BOT_API.GetApi().Messages.Send(msp);
-            else Console.WriteLine(msp.Message);
+            if (bot.GetSettings().GetIsDebug() == false)
+            {
+                if (bot is GroupBot && BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                {
+                    try
+                    {
+                        bot.GetApi().Messages.Send(msp);
+                    }
+                    catch
+                    {
+                        SendMessage(BOT_API.Bots[BOT_API.MainBot], m, message, isChat, needAttachments);
+                    }
+                }
+                else bot.GetApi().Messages.Send(msp);
+            }
+            else Console.WriteLine($"(ответ){bot.Name}: " + msp.Message);
         }
         public static bool ContainsMessage(Message containMes, IEnumerable<Message> Messages)
         {
@@ -91,7 +184,7 @@ namespace BOT_Platform.Interfaces
             }
             return contains; 
         }
-        public static void GetUserId(ref string url)
+        public static void GetUserId(ref string url, Bot bot)
         {
             url = url.Replace(" ", "");
             int index = url.ToString().LastIndexOf('/');
@@ -110,16 +203,24 @@ namespace BOT_Platform.Interfaces
                 }
                 else
                 {
-                    url = BOT_API.GetApi().Users.Get(url).Id.ToString();
+                    url = bot.GetApi().Users.Get(url).Id.ToString();
                 }
             }
 
             else if (reg.IsMatch(url))
             {
-                url = BOT_API.GetApi().Users.Get(url).Id.ToString();
+                if (bot is GroupBot)
+                {
+                    if (BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                        url = BOT_API.Bots[BOT_API.MainBot].GetApi().Users.Get(url).Id.ToString();
+                    else throw new WrongParamsException("В данный момент бот не может отправлять сообщения по короткой ссылке пользователя." +
+                                                        "\nПожалуйста, укажите вместо ссылки численное значение без \"id\"");
+                }
+
+                else url = bot.GetApi().Users.Get(url).Id.ToString();
             }
         }
-        public static string GetUserId(string url)
+        public static string GetUserId(string url, Bot bot)
         {
             url = url.Replace(" ", "");
             int index = url.ToString().LastIndexOf('/');
@@ -138,13 +239,21 @@ namespace BOT_Platform.Interfaces
                 }
                 else
                 {
-                    url = BOT_API.GetApi().Users.Get(url).Id.ToString();
+                    url = bot.GetApi().Users.Get(url).Id.ToString();
                 }
             }
 
             else if (reg.IsMatch(url))
             {
-                url = BOT_API.GetApi().Users.Get(url).Id.ToString();
+                if (bot is GroupBot)
+                {
+                    if (BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                        url = BOT_API.Bots[BOT_API.MainBot].GetApi().Users.Get(url).Id.ToString();
+                    else throw new WrongParamsException("В данный момент бот не может отправлять сообщения по короткой ссылке пользователя." +
+                                                        "\nПожалуйста, укажите вместо ссылки численное значение без \"id\"");
+                }
+
+                else url = bot.GetApi().Users.Get(url).Id.ToString();
             }
             return url;
         }
@@ -166,24 +275,30 @@ namespace BOT_Platform.Interfaces
                  .Replace(",", "%2C")
                  .Replace("/", "%2F");
         }
-        public static Photo UploadImageInMessage(string photoName)
+        public static Photo UploadImageInMessage(string photoName, Bot bot)
         {
-            var uploadServer = BOT_API.GetApi().Photo.GetMessagesUploadServer();
+            var uploadServer = bot.GetApi().Photo.GetMessagesUploadServer();
             // Загрузить фотографию.
             var wc = new WebClient();
             var responseImg = Encoding.ASCII.GetString(wc.UploadFile(uploadServer.UploadUrl, photoName));
             // Сохранить загруженную фотографию
-            return BOT_API.GetApi().Photo.SaveMessagesPhoto(responseImg)[0];
+            return bot.GetApi().Photo.SaveMessagesPhoto(responseImg)[0];
         }
 
-        public static Document UploadDocumentInMessage(string filename, string docName)
+        public static Document UploadDocumentInMessage(string filename, string docName, Bot bot)
         {
-            var uploadServer = BOT_API.GetApi().Docs.GetWallUploadServer();
+            UploadServerInfo uploadServer;
+
+            bot = bot is GroupBot && BOT_API.Bots.ContainsKey(BOT_API.MainBot) ?
+                BOT_API.Bots[BOT_API.MainBot] : bot;
+
+            if (bot is GroupBot) uploadServer = bot.GetApi().Docs.GetWallUploadServer();
+            else uploadServer = bot.GetApi().Docs.GetUploadServer();
             // Загрузить документ.
             var wc = new WebClient();
             var responseDoc = Encoding.ASCII.GetString(wc.UploadFile(uploadServer.UploadUrl, filename));
             // Сохранить загруженный документ
-            return BOT_API.GetApi().Docs.Save(responseDoc, docName)[0];
+            return bot.GetApi().Docs.Save(responseDoc, docName)[0];
         }
     }
 }

@@ -18,43 +18,35 @@ namespace MyFunctions
             CommandsList.TryAddCommand("компот", new MyComandStruct("", Smuzi, true));
         }
 
-        private void Smuzi(Message message, object[] p)
+        private void Smuzi(Message message, string args, Bot bot)
         {
             if (message.UserId == 152461768)
-                Functions.SendMessage(message, "не компот, а смузи 🍹", message.ChatId != null);
-            else
-            {
-                Functions.SendMessage(message, "Ты не Алёнка :c", message.ChatId != null);
-            }
+                Functions.SendMessage(bot, message, "не компот, а смузи 🍹", message.ChatId != null);
+
         }
 
-        private void Tucha(Message message, object[] p)
+        private void Tucha(Message message, string args, Bot bot)
         {
             if (message.UserId == 65533985)
-                Functions.SendMessage(message, "Лови, Тучка, 100000$ 💰😉👌", message.ChatId != null);
-            else 
-            {
-                Functions.SendMessage(message, "Ты не Тучка ;/ Скорее всего, ты Кверти, ко-ко-ко.", message.ChatId != null);
-                SpeechText.Speech(message, "Кверти-петух, ко-ко-ко");
-            }
+                Functions.SendMessage(bot, message, "Лови, Тучка, 100000$ 💰😉👌", message.ChatId != null);
         }
 
-        void Jane(Message message, object[] p)
+        void Jane(Message message, string args, Bot bot)
         {
             if(message.UserId == 96534939)
-                Functions.SendMessage(message, "и ты солнышко c: , милая Женечка :3", message.ChatId != null);
+                Functions.SendMessage(bot, message, "и ты солнышко c: , милая Женечка :3", message.ChatId != null);
         }
 
-        void MM(Message message, params object[] p)
+        void MM(Message message, string args, Bot bot)
         {
-            Functions.SendMessage(message, "Лучше всех!", message.ChatId != null);
+            Functions.SendMessage(bot, message, "Лучше всех!", message.ChatId != null);
         }
 
-        void HowTo(Message message, params object[] p)
+        void HowTo(Message message, string args, Bot bot)
         {
-            Functions.SendMessage(message, "Не паникуй, ты же не с ПМ-ПУ. Надеюсь.", message.ChatId != null);
+            Functions.SendMessage(bot, message, "Не паникуй, ты же не с ПМ-ПУ. Надеюсь.", message.ChatId != null);
         }
-        void Biography(Message message, params object[] p)
+        void Biography(Message message, string args, Bot bot)
         {
             string biography =
              "Я почти что не бесполезный бот, который умеет делать почти что не бесполезные вещи. " +
@@ -79,17 +71,17 @@ namespace MyFunctions
               "Ну а если вы разработчик, быдлокодер, любитель спагетти-кода, " +
               "и вы хотите добавить в меня ещё больше почти что "+
               "не бесполезного функционала - напишите ему https://vk.com/dedsec_alexberezhnyh.";
-            Functions.SendMessage(message, biography, message.ChatId != null);
+            Functions.SendMessage(bot, message, biography, message.ChatId != null);
         }
-        void PU(Message message, params object[] p)
+        void PU(Message message, string args, Bot bot)
         {
-            Functions.SendMessage(message, "пту при ЛГУ!", message.ChatId != null);
+            Functions.SendMessage(bot, message, "пту при ЛГУ!", message.ChatId != null);
         }
 
 
-        public bool NeedCommandInfo(Message message, params object[] p)
+        public bool NeedCommandInfo(Message message, string args, Bot bot)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public EasterEggs()

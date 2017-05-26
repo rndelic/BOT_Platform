@@ -37,48 +37,50 @@ namespace MyFunctions
                                        "отправляет лог-файл", SendLog, true));
         }
 
-        private void SendLog(Message message, object[] p)
+        private void SendLog(Message message, string args, Bot bot)
         {
-            if (!CheckRoots(message.UserId))
+            if (!CheckRoots(message.UserId, bot))
             {
-                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Недостаточно прав доступа для просмотра данной команды ⛔️", message.ChatId != null);
                 return;
             }
 
             List<Document> docList = new List<Document>();
-            docList.Add(Functions.UploadDocumentInMessage(Log.logFile, $"log {DateTime.Now.ToLocalTime()}"));
+            docList.Add(Functions.UploadDocumentInMessage(bot.Directory + $@"\{Log.logFile}", $"log {DateTime.Now.ToLocalTime()}", bot));
 
             MessagesSendParams param = new MessagesSendParams();
             param.Attachments = new ReadOnlyCollection<Document>(docList);
 
-            Functions.SendMessage(message, param, "", message.ChatId != null);
+            Functions.SendMessage(bot, message, param, "", message.ChatId != null);
         }
 
-        private void Ban(Message message, object[] p)
+        private void Ban(Message message, string args, Bot bot)
         {
-            if (!CheckRoots(message.UserId))
+            if (!CheckRoots(message.UserId, bot))
             {
-                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Недостаточно прав доступа для просмотра данной команды ⛔️", message.ChatId != null);
                 return;
             }
-            string[] param = p[0].ToString().Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
-            CommandsList.TryBanUser(message, Functions.GetUserId(param[0]), param[1]);
+            string[] param = args.Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            CommandsList.TryBanUser(message, Functions.GetUserId(param[0], bot), param[1], bot);
         }
 
-        private void UnBan(Message message, object[] p)
+        private void UnBan(Message message, string args, Bot bot)
         {
-            if (!CheckRoots(message.UserId))
+            if (!CheckRoots(message.UserId, bot))
             {
-                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Недостаточно прав доступа для просмотра данной команды ⛔️", message.ChatId != null);
                 return;
             }
-            CommandsList.TryUnBanUser(message, Functions.GetUserId(p[0].ToString()));
+            CommandsList.TryUnBanUser( message, Functions.GetUserId(args, bot), bot);
         }
 
-        bool CheckRoots(long? UserId)
+        bool CheckRoots(long? UserId, Bot bot)
         {
-            if (UserId != 150887062 && UserId != BOT_API.GetApi().UserId) return false;
-            return true;
+            if (bot.GetAdmins.Where(adminId => adminId == UserId).Any())
+                return true;
+            return false;
+
         }
         public PCcontrols()
         {
@@ -86,42 +88,42 @@ namespace MyFunctions
         }
 
 
-        void Block(Message message, params object[] p)
+        void Block(Message message, string args, Bot bot)
         {
-            if (!CheckRoots(message.UserId))
+            if (!CheckRoots(message.UserId, bot))
             {
-                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Недостаточно прав доступа для просмотра данной команды ⛔️", message.ChatId != null);
                 return;
             }
             BlockInput(true);
             Console.WriteLine("Input ЗАблокирован.");
-            Functions.SendMessage(message, "Input заблокирован.", message.ChatId != null);
+            Functions.SendMessage(bot, message, "Input заблокирован.", message.ChatId != null);
         }
-        void UnBlock(Message message, params object[] p)
+        void UnBlock(Message message, string args, Bot bot)
         {
-            if (!CheckRoots(message.UserId))
+            if (!CheckRoots(message.UserId, bot))
             {
-                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Ты не админ :D", message.ChatId != null);
                 return;
             }
             BlockInput(false);
             Console.WriteLine("Input РАЗблокирован.");
-            Functions.SendMessage(message, "Input разблокирован.", message.ChatId != null);
+            Functions.SendMessage(bot, message, "Input разблокирован.", message.ChatId != null);
         }
 
-        void OffPC(Message message, params object[] p)
+        void OffPC(Message message, string args, Bot bot)
         {
-            if (!CheckRoots(message.UserId))
+            if (!CheckRoots(message.UserId, bot))
             {
-                Functions.SendMessage(message, "Ты не админ :D", message.ChatId != null);
+                Functions.SendMessage(bot, message, "Недостаточно прав доступа для просмотра данной команды ⛔️", message.ChatId != null);
                 return;
             }
 
             bool isHibernate = System.Windows.Forms.Application.SetSuspendState(System.Windows.Forms.PowerState.Hibernate, false, false);
             if (isHibernate == false)
             {
-                Console.WriteLine("Невозможно перевести ПК в спящий режим");
-                Functions.SendMessage(message, "Невозможно перевести ПК в спящий режим", message.ChatId != null);
+                Console.WriteLine("Невозможно перевести бота в спящий режим");
+                Functions.SendMessage(bot, message, "Невозможно перевести ПК в спящий режим", message.ChatId != null);
             }
             //else Functions.SendMessage(message, "ПК был переведён в спящий режим", message.ChatId != null);
         }
