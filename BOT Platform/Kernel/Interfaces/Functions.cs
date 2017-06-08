@@ -8,6 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using BOT_Platform.Kernel;
+using BOT_Platform.Kernel.Bots;
 using MyFunctions.Exceptions;
 using VkNet.Model;
 using VkNet.Model.Attachments;
@@ -64,7 +66,7 @@ namespace BOT_Platform.Interfaces
 
             if (bot.GetSettings().GetIsDebug() == false)
             {
-                if (bot is GroupBot && BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                if (bot is GroupBot && Program.Bots.ContainsKey(Program.MainBot))
                 {
                     try
                     {
@@ -72,7 +74,7 @@ namespace BOT_Platform.Interfaces
                     }
                     catch
                     {
-                        SendMessage(BOT_API.Bots[BOT_API.MainBot], message, m, body, isChat, needAttachments);
+                        SendMessage(Program.Bots[Program.MainBot], message, m, body, isChat, needAttachments);
                     }
                 }
                 else bot.GetApi().Messages.Send(m);
@@ -154,7 +156,7 @@ namespace BOT_Platform.Interfaces
 
             if (bot.GetSettings().GetIsDebug() == false)
             {
-                if (bot is GroupBot && BOT_API.Bots.ContainsKey(BOT_API.MainBot))
+                if (bot is GroupBot && Program.Bots.ContainsKey(Program.MainBot))
                 {
                     try
                     {
@@ -162,7 +164,7 @@ namespace BOT_Platform.Interfaces
                     }
                     catch
                     {
-                        SendMessage(BOT_API.Bots[BOT_API.MainBot], m, message, isChat, needAttachments);
+                        SendMessage(Program.Bots[Program.MainBot], m, message, isChat, needAttachments);
                     }
                 }
                 else bot.GetApi().Messages.Send(msp);
@@ -184,44 +186,25 @@ namespace BOT_Platform.Interfaces
             }
             return contains; 
         }
-        public static void GetUserId(ref string url, Bot bot)
-        {
-            url = url.Replace(" ", "");
-            int index = url.ToString().LastIndexOf('/');
-            if (index != -1) url = url.ToString().Substring(index + 1);
-
-            Regex reg = new Regex("[a-z|A-Z]");
-            bool regexIsFoundInFull = reg.IsMatch(url);
-
-            //Если нашёл "id"
-            index = url.ToString().IndexOf("id");
-            if (index == 0)
-            {
-                if (!reg.IsMatch(url.ToString().Substring(2)))
-                {
-                    url = url.ToString().Substring(2);
-                }
-                else
-                {
-                    url = bot.GetApi().Users.Get(url).Id.ToString();
-                }
-            }
-
-            else if (reg.IsMatch(url))
-            {
-                if (bot is GroupBot)
-                {
-                    if (BOT_API.Bots.ContainsKey(BOT_API.MainBot))
-                        url = BOT_API.Bots[BOT_API.MainBot].GetApi().Users.Get(url).Id.ToString();
-                    else throw new WrongParamsException("В данный момент бот не может отправлять сообщения по короткой ссылке пользователя." +
-                                                        "\nПожалуйста, укажите вместо ссылки численное значение без \"id\"");
-                }
-
-                else url = bot.GetApi().Users.Get(url).Id.ToString();
-            }
-        }
         public static string GetUserId(string url, Bot bot)
         {
+            string GetUrlWithApi(string _url)
+            {
+
+                if (bot is GroupBot)
+                {
+                    if (Program.Bots.ContainsKey(Program.MainBot))
+                        _url = Program.Bots[Program.MainBot].GetApi().Users.Get(_url).Id.ToString();
+                    else
+                        throw new WrongParamsException(
+                            "В данный момент бот не может отправлять сообщения по короткой ссылке пользователя." +
+                            "\nПожалуйста, укажите вместо ссылки численное значение без \"id\"");
+                }
+
+                else _url = bot.GetApi().Users.Get(_url).Id.ToString();
+                return _url;
+            }
+
             url = url.Replace(" ", "");
             int index = url.ToString().LastIndexOf('/');
             if (index != -1) url = url.ToString().Substring(index + 1);
@@ -239,21 +222,13 @@ namespace BOT_Platform.Interfaces
                 }
                 else
                 {
-                    url = bot.GetApi().Users.Get(url).Id.ToString();
+                    url = GetUrlWithApi(url);
                 }
             }
 
             else if (reg.IsMatch(url))
             {
-                if (bot is GroupBot)
-                {
-                    if (BOT_API.Bots.ContainsKey(BOT_API.MainBot))
-                        url = BOT_API.Bots[BOT_API.MainBot].GetApi().Users.Get(url).Id.ToString();
-                    else throw new WrongParamsException("В данный момент бот не может отправлять сообщения по короткой ссылке пользователя." +
-                                                        "\nПожалуйста, укажите вместо ссылки численное значение без \"id\"");
-                }
-
-                else url = bot.GetApi().Users.Get(url).Id.ToString();
+                url = GetUrlWithApi(url);
             }
             return url;
         }
@@ -289,8 +264,8 @@ namespace BOT_Platform.Interfaces
         {
             UploadServerInfo uploadServer;
 
-            bot = bot is GroupBot && BOT_API.Bots.ContainsKey(BOT_API.MainBot) ?
-                BOT_API.Bots[BOT_API.MainBot] : bot;
+            bot = bot is GroupBot && Program.Bots.ContainsKey(Program.MainBot) ?
+                Program.Bots[Program.MainBot] : bot;
 
             if (bot is GroupBot) uploadServer = bot.GetApi().Docs.GetWallUploadServer();
             else uploadServer = bot.GetApi().Docs.GetUploadServer();

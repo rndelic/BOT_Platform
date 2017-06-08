@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using BOT_Platform.Kernel.Bots;
 using VkNet.Model;
 
 namespace MyFunctions

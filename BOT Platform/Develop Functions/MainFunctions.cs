@@ -9,6 +9,8 @@ using BOT_Platform;
 using System.Text.RegularExpressions;
 using VkNet.Enums.SafetyEnums;
 using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel;
+using BOT_Platform.Kernel.Bots;
 using MyFunctions.Exceptions;
 
 namespace MyFunctions
@@ -44,12 +46,15 @@ namespace MyFunctions
         {
             List<string> com = CommandsList.GetCommandList(true);
             StringBuilder sb = new StringBuilder();
-            sb.Append("Напоминание! Все параметры пишутся внутри единых скобок через разделитель!\nСписок команд:\n");
+            sb.Append("Напоминание! Все параметры пишутся внутри единых скобок через разделитель (,)!\nСписок команд:\n");
 
             foreach (string value in com)
             {
                 sb.Append(bot.GetSettings().BotName[0] + ", " + value + "\n");
             }
+
+            sb.Append(
+                "\nДля получения более подробной справки по команде напишите её без параметров. Например: бот, вики() или бот, вики");
 
             Functions.SendMessage(bot, message, sb.ToString(), message.ChatId != null);
         }
@@ -102,8 +107,8 @@ namespace MyFunctions
             {
                 if (bot is GroupBot)
                 {
-                    if (BOT_API.Bots.ContainsKey(BOT_API.MainBot))
-                        BOT_API.Bots[BOT_API.MainBot].GetApi().Likes.Add(lAP);
+                    if (Program.Bots.ContainsKey(Program.MainBot))
+                        Program.Bots[Program.MainBot].GetApi().Likes.Add(lAP);
                     else
                         throw new WrongParamsException(
                             "В данный момент бот не может лайкать ваши записи ;c");
@@ -183,7 +188,7 @@ namespace MyFunctions
                 return;
             }
 
-            Functions.GetUserId(ref param[0], bot);
+            param[0] = Functions.GetUserId(param[0], bot);
             message.UserId = Convert.ToInt32(param[0]); ;
 
             try

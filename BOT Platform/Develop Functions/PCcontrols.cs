@@ -9,6 +9,7 @@ using VkNet.Model;
 using BOT_Platform.Interfaces;
 using VkNet.Model.RequestParams;
 using System.Collections.ObjectModel;
+using BOT_Platform.Kernel.Bots;
 using VkNet.Model.Attachments;
 using static BOT_Platform.CommandsList;
 

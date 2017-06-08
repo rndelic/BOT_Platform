@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
 using  System.Threading;
+using System.Threading.Tasks;
+using BOT_Platform.Kernel;
+using BOT_Platform.Kernel.Bots;
 
 namespace BOT_Platform
 {
@@ -42,7 +45,7 @@ namespace BOT_Platform
 
             static CommandsList()
             {
-                BOT_API.ClearCommands += BOT_API_ClearCommands;
+                Program.ClearCommands += BOT_API_ClearCommands;
             }
 
         public delegate void Function(Message message, string args, Bot bot);
@@ -201,9 +204,13 @@ namespace BOT_Platform
                           $"Команда: \"" + message.Title + "\"\n" + ex.Message + "\n" +
                           "[STACK_TRACE] " + ex.StackTrace + "\n" +
                           "---------------------------------------------------------------------\n";
-            Console.WriteLine(text);
-
-            Log.WriteLog(text, bot.Directory);
+            Parallel.Invoke(() =>
+            {
+                Console.WriteLine(text);
+            },()=>
+            {
+                Log.WriteLog(text, bot.Directory);
+            });
         }
     }
 }

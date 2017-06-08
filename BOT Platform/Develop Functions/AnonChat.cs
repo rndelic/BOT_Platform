@@ -12,6 +12,7 @@ using BOT_Platform;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
 using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel.Bots;
 using MyFunctions;
 using MyFunctions.Exceptions;
 
@@ -100,46 +101,26 @@ namespace MyFunctions
 
             chat.usersId.Add(message.UserId.Value, 1);
 
-            uint count = 2;
+            int count = 2;
             for (int i = 0; i < userId.Length; i++)
             {
-                int index = userId[i].ToString().LastIndexOf('/');
-                if (index != -1) userId[i] = userId[i].ToString().Substring(index + 1);
-
-                Regex reg = new Regex("[а-я|А-Я|a-z|A-Z]");
-                bool regexIsFoundInFull = reg.IsMatch(userId[i]);
-
-                //Если нашёл "id"
-                userId[i] = userId[i].Replace(" ", "");
-
-                index = userId[i].ToString().IndexOf("id");
-                if (index == 0)
+                try
                 {
-                    if (!reg.IsMatch(userId[i].ToString().Substring(2)))
-                    {
-                        userId[i] = userId[i].ToString().Substring(2);
-                    }
-                    else
-                    {
-                        userId[i] = bot.GetApi().Users.Get(userId[i]).Id.ToString();
-                    }
+                    userId[i] = Functions.GetUserId(userId[i], bot);
                 }
-
-                else if (reg.IsMatch(userId[i]))
+                catch
                 {
-                    try
-                    {
-                        userId[i] = bot.GetApi().Users.Get(userId[i]).Id.ToString();
-                    }
-                    catch
-                    {
-                        Functions.SendMessage(bot, message, "Неверная ссылка: \"" + userId[i] + "\" не является пользователем ¯\\_(ツ)_/¯.", message.ChatId != null);
-                        continue;
-                    }
+                    Functions.SendMessage(bot, message,
+                        "Неверная ссылка: \"" + userId[i] + "\" не является пользователем ¯\\_(ツ)_/¯.",
+                        message.ChatId != null);
+                    continue;
                 }
 
                 message.UserId = Convert.ToInt32(userId[i]);
-                if (chat.usersId.ContainsKey(message.UserId.Value)) continue;
+                lock (lockObject)
+                {
+                    if (chat.usersId.ContainsKey(message.UserId.Value)) continue;
+                }
 
                 try
                 {
@@ -154,8 +135,11 @@ namespace MyFunctions
                     continue;
                 }
 
-                chat.usersId.Add(message.UserId.Value, count);
-                ++count;
+                lock (lockObject)
+                {
+                    chat.usersId.Add(message.UserId.Value, (uint)count);
+                }
+                Interlocked.Increment(ref count);
             }
             message.UserId = answerId;
 
@@ -171,7 +155,6 @@ namespace MyFunctions
             }
             else Functions.SendMessage(bot, message, "Чат " + chatTitle + " не удалось создать ¯\\_(ツ)_/¯.", message.ChatId != null);
         }
-
         public static void ChatSend(Message message, string chatTitle, string mesBody, Bot bot) 
         {
             Functions.RemoveSpaces(ref chatTitle);
@@ -187,32 +170,38 @@ namespace MyFunctions
 
             if (mesBody[0] == '!') sendParams = SpeechText.MakeSpeechAttachment(mesBody.Substring(1), message, bot);
             KeyValuePair<long, uint>[] usersId = Chats[chatTitle].usersId.Where(t => t.Key != message.UserId.Value).ToArray();
-            for (int i = 0; i < usersId.Length; i++)
-            {
-                try
+
+            Task.Run(() => Parallel.For(0, usersId.Length, i =>
                 {
-                    Message m = new Message()
+                    try
                     {
-                        UserId = usersId[i].Key,
-                        Attachments = message.Attachments
-                    };
-                    if(mesBody[0] != '!')
-                        Functions.SendMessage(bot, m, "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value] + " аноним: " + mesBody, m.ChatId != null, true);
-                    else
-                        Functions.SendMessage(bot, m, sendParams, "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value] + " аноним: [аудиоосообщение]", m.ChatId != null, true);
+                        Message m = new Message()
+                        {
+                            UserId = usersId[i].Key,
+                            Attachments = message.Attachments
+                        };
+                        if (mesBody[0] != '!')
+                            Functions.SendMessage(bot, m,
+                                "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value] + " аноним: " +
+                                mesBody, m.ChatId != null, true);
+                        else
+                            Functions.SendMessage(bot, m, sendParams,
+                                "(" + chatTitle + ") " + Chats[chatTitle].usersId[message.UserId.Value] +
+                                " аноним: [аудиоосообщение]", m.ChatId != null, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        User user = bot.GetApi().Users.Get(usersId[i].Value);
+                        Functions.SendMessage(bot, message, "Не удалось доставить сообщение " +
+                                                            usersId[i].Value + " анониму ¯\\_(ツ)_/¯.",
+                            message.ChatId != null);
+                    }
+                    //Thread.Sleep(bot.GetSettings().Delay);
                 }
-                catch (Exception ex)
-                {
-                    User user = bot.GetApi().Users.Get(usersId[i].Value);
-                    Functions.SendMessage(bot, message, "Не удалось доставить сообщение " +
-                                                   usersId[i].Value + " анониму ¯\\_(ツ)_/¯.", message.ChatId != null);
-                }
-                //Thread.Sleep(bot.GetSettings().Delay);
-            }
+            )).Wait();
             Functions.SendMessage(bot, message, "Отправка завершена.", message.ChatId != null);
 
         }
-
         public AnonChat()
         {
             AddMyCommandInPlatform();

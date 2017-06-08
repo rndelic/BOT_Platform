@@ -3,6 +3,7 @@ using BOT_Platform;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
 using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel.Bots;
 
 namespace MyFunctions
 {
@@ -22,6 +23,7 @@ namespace MyFunctions
         {
             if (message.UserId == 152461768)
                 Functions.SendMessage(bot, message, "не компот, а смузи 🍹", message.ChatId != null);
+            else Functions.SendMessage(bot, message, "Ты не Алёнка :P", message.ChatId != null);
 
         }
 

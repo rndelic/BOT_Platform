@@ -48,7 +48,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>BOT_Platform.BOT_API</StartupObject>
+    <StartupObject>BOT_Platform.Kernel.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
@@ -125,7 +125,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Kernel\Bots.cs" />
+    <Compile Include="Kernel\Banlist.cs" />
+    <Compile Include="Kernel\Bots\Bots.cs" />
     <Compile Include="InDevelop%28alfa%29\CommandDetector.cs" />
     <Compile Include="Develop Functions\Delelop Libs\Gif\AnimatedGifEncoder.cs" />
     <Compile Include="Develop Functions\AnonChat.cs" />
@@ -150,6 +151,8 @@
     <Compile Include="Kernel\Program.cs" />
     <Compile Include="Develop Functions\Mems.cs" />
     <Compile Include="Kernel\Log.cs" />
+    <Compile Include="Kernel\SerializableDictionary.cs" />
+    <Compile Include="Kernel\Bots\Spamer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Kernel\Settings.cs" />
     <Compile Include="Develop Functions\SpeechTheText.cs" />

@@ -14,24 +14,18 @@
  * 14) Ответ на непрочитанные
  */
 using System;
-using VkNet;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Reflection;
-using System.Linq;
-using VkNet.Model;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using BOT_Platform.Interfaces;
-using System.Threading.Tasks;
-using VkNet.Enums.Filters;
-using VkNet.Model.RequestParams;
-using VkNet.Utils;
+using BOT_Platform.Kernel.Bots;
+using VkNet;
 
-namespace BOT_Platform
+namespace BOT_Platform.Kernel
 {
-    static partial class BOT_API
+    static partial class Program
     {
         //TODO: REMOVE
         public static VkApi GetApi()
@@ -47,8 +41,12 @@ namespace BOT_Platform
         const string DevNamespace = "MyFunctions";   /* Пространоство имён, содержащее только
                                                       * пользовательские функции
                                                       */
-        const string UsersBots = "UsersBots";
-        const string GroupsBots = "GroupsBots";
+        const string UsersBots = @"Bots\UsersBots";
+        const string GroupsBots = @"Bots\GroupsBots";
+        const string OtherBots = @"Bots\OtherBots";
+
+        private const string BotClasses = @"BOT_Platform.Kernel.Bots";
+
         public const string MainBot = "MainBot";
 
         public static volatile Dictionary<string, Bot> Bots;
@@ -59,6 +57,7 @@ namespace BOT_Platform
         {
             if (!Directory.Exists(UsersBots)) Directory.CreateDirectory(UsersBots);
             if (!Directory.Exists(GroupsBots)) Directory.CreateDirectory(GroupsBots);
+            if (!Directory.Exists(OtherBots)) Directory.CreateDirectory(OtherBots);
 
             Console.WriteLine("[Инициализация консоли...]");
             /* Подключаем стандартный модуль с базовыми командами */
@@ -74,7 +73,6 @@ namespace BOT_Platform
         /// </summary>
         internal static void ConsoleCommander()
         {
-            //TODO: CHANGE TITLE
             /* Считываем настройки бота из файла настроек */
             Console.WriteLine("[Загружаются параметры платформы...]");
 
@@ -151,6 +149,9 @@ namespace BOT_Platform
 
                 if (!File.Exists(dirInfo.FullName + $@"\{CommandsList.Log.logFile}"))
                     File.Create(dirInfo.FullName + $@"\{CommandsList.Log.logFile}").Close();
+                if (!File.Exists(dirInfo.FullName + $@"\{Banlist.FILENAME}"))
+                    File.Create(dirInfo.FullName + $@"\{Banlist.FILENAME}").Close();
+
                 if (!File.Exists(dirInfo.FullName + $@"\{PlatfromSettings.PATH}"))
                 {
                     File.Create(dirInfo.FullName + $@"\{PlatfromSettings.PATH}").Close();
@@ -161,29 +162,82 @@ namespace BOT_Platform
 
             try
             {
-                foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{UsersBots}")).GetDirectories())
+                Console.WriteLine("[Подключение UserBots...]");
+                foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{UsersBots}"))
+                    .GetDirectories())
                 {
-                    if(AddSystem(dirInfo))
+                    if (AddSystem(dirInfo))
                         File.WriteAllText(dirInfo.FullName + $@"\{PlatfromSettings.PATH}",
                             Properties.Settings.Default.SettingsTemplateUserBot);
                     UserBot bot = new UserBot(dirInfo.Name, dirInfo.FullName);
-                    if(bot.InitalizeBot()) Bots.Add(dirInfo.Name, bot);
+                    if (bot.InitalizeBot()) Bots.Add(dirInfo.Name, bot);
                 }
-                foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{GroupsBots}")).GetDirectories())
+                Console.WriteLine("Done.");
+                Console.WriteLine("[Подключение GroupsBots...]");
+                foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{GroupsBots}"))
+                    .GetDirectories())
                 {
-                    if(AddSystem(dirInfo))
-                        File.WriteAllText(dirInfo.FullName + $@"\{PlatfromSettings.PATH}", 
+                    if (AddSystem(dirInfo))
+                        File.WriteAllText(dirInfo.FullName + $@"\{PlatfromSettings.PATH}",
                             Properties.Settings.Default.SettingsTemplateGroupBot);
                     GroupBot bot = new GroupBot(dirInfo.Name, dirInfo.FullName);
                     if (bot.InitalizeBot()) Bots.Add(dirInfo.Name, bot);
                 }
+                Console.WriteLine("Done.");
+                Console.WriteLine("[Подключение OthersBots...]");
+                foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{OtherBots}"))
+                    .GetDirectories())
+                {
+                    try
+                    {
+                        if (AddSystem(dirInfo))
+                            File.WriteAllText(dirInfo.FullName + $@"\{PlatfromSettings.PATH}",
+                                Properties.Settings.Default.SettingsTemplateGroupBot);
+
+                        Type BotType = null;
+
+                        BotType = Type.GetType(
+                            $"{BotClasses}.{dirInfo.Name.Substring(1, dirInfo.Name.IndexOf(']') - 1)}",
+                            false, true);
+
+                        if (BotType != null)
+                        {
+                            ConstructorInfo ci = BotType.GetConstructor(
+                                new Type[] {typeof(string), typeof(string)});
+
+                            object bot = Activator.CreateInstance(type: BotType);
+
+                            ci.Invoke(bot,
+                                new object[]
+                                {
+                                    dirInfo.Name.Substring(dirInfo.Name.IndexOf(']') + 1).Replace(" ", ""),
+                                    dirInfo.FullName
+                                });
+                            if ((bot as Bot).InitalizeBot()) Bots.Add(dirInfo.Name, (Bot) bot);
+                        }
+                        else
+                        {
+                            Console.WriteLine("---------------------------------------------------------------------");
+                            Console.WriteLine($"[REFLECTION ERROR] Класс " +
+                                              $"{dirInfo.Name.Substring(1, dirInfo.Name.IndexOf(']') - 1)} не найден");
+                            Console.WriteLine("---------------------------------------------------------------------");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("---------------------------------------------------------------------");
+                        Console.WriteLine($"[ERROR] Ошибка в записи {dirInfo.Name}: {ex.Message}");
+                        Console.WriteLine("---------------------------------------------------------------------");
+                    }
+                }
+                Console.WriteLine("Done.");
             }
-            catch
-            {
-            }
+            catch {}
             if (!Bots.ContainsKey(MainBot))
             {
+                Console.WriteLine("---------------------------------------------------------------------");
                 Console.WriteLine($"[FATAL ERROR] Не удалось подключить {MainBot}, многие функции могут быть недоступны.\n");
+                Console.WriteLine("---------------------------------------------------------------------");
             }
         }
 

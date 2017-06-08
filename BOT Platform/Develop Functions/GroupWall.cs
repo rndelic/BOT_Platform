@@ -8,6 +8,7 @@ using VkNet.Model;
 using System.IO;
 using VkNet.Model.RequestParams;
 using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel.Bots;
 
 namespace MyFunctions
 {

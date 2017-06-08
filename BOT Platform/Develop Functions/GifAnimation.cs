@@ -16,6 +16,7 @@ using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using BOT_Platform.Kernel.Bots;
 using MyFunctions.Exceptions;
 
 namespace MyFunctions

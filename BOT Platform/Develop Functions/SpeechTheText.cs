@@ -16,6 +16,8 @@ using System.IO;
 using System.Linq;
 using MyFunctions.Exceptions;
 using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel;
+using BOT_Platform.Kernel.Bots;
 
 namespace MyFunctions
 {
@@ -96,7 +98,7 @@ namespace MyFunctions
         }
         static Audio UploadAndSave(string title, string outFilenameMP3, Bot BOT)
         {
-            Bot bot = BOT_API.Bots.ContainsKey(BOT_API.MainBot) ? BOT_API.Bots[BOT_API.MainBot] : BOT;
+            Bot bot = Program.Bots.ContainsKey(Program.MainBot) ? Program.Bots[Program.MainBot] : BOT;
             Uri uploadServer = bot.GetApi().Audio.GetUploadServer();
 
             var wc = new WebClient();

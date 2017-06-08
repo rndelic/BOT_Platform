@@ -1,4 +1,5 @@
-﻿using VkNet.Model;
+﻿using BOT_Platform.Kernel.Bots;
+using VkNet.Model;
 
 namespace BOT_Platform.Interfaces
 {

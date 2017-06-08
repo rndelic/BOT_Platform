@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using BOT_Platform.Kernel.Bots;
 using MyFunctions.Exceptions;
 using VkNet.Model;
 using VkNet.Model.Attachments;
@@ -21,6 +22,7 @@ namespace MyFunctions
     class Mems: IMyCommands
     {
         private const string DIRECTORY_PATH = @"Data\Mems";
+        private char[] SEPARATOR = new char[] {'\n'};
         public void AddMyCommandInPlatform()
         {
             CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
@@ -30,8 +32,12 @@ namespace MyFunctions
             if (NeedCommandInfo(message, args, bot)) return;
 
             List<Photo> photoList = new List<Photo>();
-            string[] text = args.Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries)
+            string[] text = args.Split(SEPARATOR, 2, StringSplitOptions.RemoveEmptyEntries)
                                            .Reverse().ToArray();
+            for (int i = 0; i < text.Length; i++)
+            {
+                text[i] = text[i].Replace("\\n", " ");
+            }
 
             if(text.Length == 0 || String.IsNullOrWhiteSpace(text[0]) ||
                                    String.IsNullOrEmpty(text[0]) ||
@@ -172,10 +178,10 @@ namespace MyFunctions
             string info = $"Справка по команде \"{message.Body}\":\n\n" +
                "Бот комбинирует текст, указанный в скобках, и прикреплённое сообщение.\n\n" +
                "Учтите, что прикреплять нужно одно изображение, а текст не должен быть намного длиннее ширины изображения, иначе бот выдаст ошибку.\n\n" +
-               "Для того, чтобы текст был написан лишь на нижней части изображения, напишите его в скобках без разделителя ,(запятой).\n" +
+               "Для того, чтобы текст был написан лишь на нижней части изображения, напишите его, не начиная текст с новой строки.\n" +
                $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(когда купил айфон) - бот отправит картинку с текстом внизу.\n\n" +
-               "Для того, чтобы текст был написан и сверху картинки, и снизу, поставьте в нужном месте запятую (если по какой-то причине запятых в тексте несколько, за разделитель бот примет самую первую (,)запятую.\n" +
-               $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(когда купил айфон, но понял, что любишь андроид) - внизу будет написано \"когда купил айфон\", а внизу - \"но понял, что люишь андроид\". Разделитель в изображение не попадает.";
+               "Для того, чтобы текст был написан и сверху картинки, и снизу, перейдите на новую строку (учитывается только первый переход на новую строку).\n" +
+               $"Пример: {bot.GetSettings().BotName[0]}, {message.Body}(когда купил айфон,\n но понял, что любишь андроид) - внизу будет написано \"когда купил айфон,\", а внизу - \"но понял, что любишь андроид\". Текст автоматически становится заглавным";
 
             if (args == null || String.IsNullOrEmpty(args) || String.IsNullOrWhiteSpace(args))
             {

@@ -1,14 +1,12 @@
-﻿using BOT_Platform.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BOT_Platform.Interfaces;
 using VkNet;
 using VkNet.Model;
 
-namespace BOT_Platform
+namespace BOT_Platform.Kernel.Bots
 {
     public abstract class Bot
     {
@@ -37,7 +35,9 @@ namespace BOT_Platform
             }
             catch (Exception ex)
             {
+                Console.WriteLine("---------------------------------------------------------------------");
                 Console.WriteLine($"[ERROR][{Name}]:\n" + ex.Message);
+                Console.WriteLine("---------------------------------------------------------------------");
                 return false;
             }
             return true;
@@ -69,7 +69,6 @@ namespace BOT_Platform
             {
                 Console.WriteLine($"[Запуск бота {Name}...]");
                 _app.Authorize(platformSett.AuthParams);
-                //_app.Authorize("68ff377c0c907bd8194f0e70ba81d8b4a641b4c05cadbc4e3cfca4d3b6cf4a6deaa511b88196e3af60f21", null, 0);
                 Console.WriteLine($"Бот {Name} запущен.");
             }
             catch (Exception ex)
@@ -113,25 +112,27 @@ namespace BOT_Platform
                 Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] Попытка подключиться к vk.com...");
             var answer = ConnectivityChecker.CheckConnection();
             if (!platformSett.GetIsDebug())
-                Console.WriteLine(answer.info);
+                Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] " + answer.info);
             if (!answer.status)
             {
                 do
                 {
                     Thread.Sleep(millisecondsTimeout: 30000);
-
-                    if (!platformSett.GetIsDebug())
-                        Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] Попытка подключиться к vk.com...");
                     answer = ConnectivityChecker.CheckConnection();
-                    if (!platformSett.GetIsDebug())
-                        Console.WriteLine(answer.info);
 
                 } while (!answer.status);
- 
+
+                if (!platformSett.GetIsDebug())
+                {
+                    Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() +
+                                      "] Попытка подключиться к vk.com...");
+                    Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] " + answer.info);
+                }
+
                 CommandsList.ConsoleCommand("undebug", null, this);
             }
         }
-        protected void ExecuteCommand(MessagesGetObject messages)
+        protected virtual void ExecuteCommand(MessagesGetObject messages)
         {
             Parallel.ForEach(messages.Messages, Message =>
                 {
@@ -166,7 +167,7 @@ namespace BOT_Platform
             );
             Thread.Sleep(platformSett.Delay);
         }
-        public void DebugExecuteCommand(string consoleCommand)
+        public virtual void DebugExecuteCommand(string consoleCommand)
         {
             Task.Run(() =>
                 {
@@ -283,7 +284,9 @@ namespace BOT_Platform
             }
             catch (Exception ex)
             {
+                Console.WriteLine("---------------------------------------------------------------------");
                 Console.WriteLine($"[ERROR][{Name}]:\n" + ex.Message);
+                Console.WriteLine("---------------------------------------------------------------------");
                 return false;
             }
             return true;
@@ -295,7 +298,6 @@ namespace BOT_Platform
 
                 Console.WriteLine($"[Запуск бота {Name}...]");
                 _app.Authorize((platformSett as GroupSettings).Token, null, 0);
-                Console.WriteLine($"Бот {Name} запущен.");
 
             if (!ConnectivityChecker.CheckConnection().status)
             {
@@ -304,6 +306,8 @@ namespace BOT_Platform
                 Task.Run(() => TryToRestartSystem());
                 return;
             }
+
+            Console.WriteLine($"Бот {Name} запущен.");
 
 
             lastMessages = new List<Message>();
@@ -332,6 +336,40 @@ namespace BOT_Platform
                     continue;
                 }
             }
+        }
+        protected override void ExecuteCommand(MessagesGetObject messages)
+        {
+            Parallel.ForEach(messages.Messages, Message =>
+                {
+                    if (String.IsNullOrEmpty(Message.Body)) return;
+
+                    string botName = FindBotNameInMessage(Message);
+
+                    if (Message.ChatId != null && botName == "[NOT_FOUND]")
+                        return;
+
+                    lock (lockObject)
+                        if (Functions.ContainsMessage(Message, lastMessages)) return;
+
+                    CommandInfo comInfo = GetCommandFromMessage(Message, botName);
+
+                    lock (lockObject)
+                    {
+                        if (lastMessages.Count >= platformSett.MesRemembCount)
+                        {
+                            for (int j = 0; j < lastMessages.Count / 2; j++) lastMessages.RemoveAt(0);
+                        }
+                        lastMessages.Add(Message);
+                    }
+                    string temp = Message.Body;
+                    Message.Body = comInfo.Command;
+                    Message.Title = temp;
+                    CommandsList.TryCommand(Message,
+                        comInfo.Param, this);
+                    Message.Body = temp;
+                }
+            );
+            Thread.Sleep(platformSett.Delay);
         }
     }
 
