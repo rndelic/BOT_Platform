@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel.CIO;
+using BOT_Platform.Kernel.Interfaces;
 using VkNet;
 using VkNet.Model;
 
 namespace BOT_Platform.Kernel.Bots
 {
+
     public abstract class Bot
     {
         public string Name { get; private set; }
@@ -35,9 +37,9 @@ namespace BOT_Platform.Kernel.Bots
             }
             catch (Exception ex)
             {
-                Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine($"[ERROR][{Name}]:\n" + ex.Message);
-                Console.WriteLine("---------------------------------------------------------------------");
+                BotConsole.Write("---------------------------------------------------------------------");
+                BotConsole.Write($"[ERROR][{Name}]:\n" + ex.Message);
+                BotConsole.Write("---------------------------------------------------------------------");
                 return false;
             }
             return true;
@@ -67,13 +69,13 @@ namespace BOT_Platform.Kernel.Bots
             /* Подключаемся к VK, запускаем бота */
             try
             {
-                Console.WriteLine($"[Запуск бота {Name}...]");
+                BotConsole.Write($"[Запуск бота {Name}...]");
                 _app.Authorize(platformSett.AuthParams);
-                Console.WriteLine($"Бот {Name} запущен.");
+                BotConsole.Write($"Бот {Name} запущен.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR][{Name}]:\n" + ex.Message + "\n");
+                BotConsole.Write($"[ERROR][{Name}]:\n" + ex.Message + "\n");
                 CommandsList.ConsoleCommand("debug", null, this);
                 Task.Run(() => TryToRestartSystem());
                 return;
@@ -97,9 +99,14 @@ namespace BOT_Platform.Kernel.Bots
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
+                    BotConsole.Write($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
+                    if (ex.Message == "User authorization failed: access_token has expired.")
+                    {
+                        this._app.RefreshToken();
+                        BotConsole.Write($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]: Токен обновлён.\n");
+                    }
+                    else TryToRestartSystem();
 
-                    TryToRestartSystem();
                     Thread.Sleep(platformSett.Delay);
                     continue;
                 }
@@ -109,10 +116,10 @@ namespace BOT_Platform.Kernel.Bots
         protected void TryToRestartSystem()
         {
             if(!platformSett.GetIsDebug())
-                Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] Попытка подключиться к vk.com...");
+                BotConsole.Write($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] Попытка подключиться к vk.com...");
             var answer = ConnectivityChecker.CheckConnection();
             if (!platformSett.GetIsDebug())
-                Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] " + answer.info);
+                BotConsole.Write($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] " + answer.info);
             if (!answer.status)
             {
                 do
@@ -124,9 +131,9 @@ namespace BOT_Platform.Kernel.Bots
 
                 if (!platformSett.GetIsDebug())
                 {
-                    Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() +
+                    BotConsole.Write($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() +
                                       "] Попытка подключиться к vk.com...");
-                    Console.WriteLine($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] " + answer.info);
+                    BotConsole.Write($"[NET_INFO {Name} " + DateTime.Now.ToLongTimeString() + "] " + answer.info);
                 }
 
                 CommandsList.ConsoleCommand("undebug", null, this);
@@ -171,8 +178,7 @@ namespace BOT_Platform.Kernel.Bots
         {
             Task.Run(() =>
                 {
-                    Message Message = new Message();
-                    Message.Body = consoleCommand;
+                    Message Message = new Message {Body = consoleCommand};
 
                     if (String.IsNullOrEmpty(Message.Body)) return;
 
@@ -284,9 +290,9 @@ namespace BOT_Platform.Kernel.Bots
             }
             catch (Exception ex)
             {
-                Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine($"[ERROR][{Name}]:\n" + ex.Message);
-                Console.WriteLine("---------------------------------------------------------------------");
+                BotConsole.Write("---------------------------------------------------------------------");
+                BotConsole.Write($"[ERROR][{Name}]:\n" + ex.Message);
+                BotConsole.Write("---------------------------------------------------------------------");
                 return false;
             }
             return true;
@@ -296,18 +302,18 @@ namespace BOT_Platform.Kernel.Bots
         {
             /* Подключаемся к VK, запускаем бота */
 
-                Console.WriteLine($"[Запуск бота {Name}...]");
+                BotConsole.Write($"[Запуск бота {Name}...]");
                 _app.Authorize((platformSett as GroupSettings).Token, null, 0);
 
             if (!ConnectivityChecker.CheckConnection().status)
             {
-                Console.WriteLine($"[ERROR][{Name}]:\n" + "Ошибк подключения к vk.com" + "\n");
+                BotConsole.Write($"[ERROR][{Name}]:\n" + "Ошибк подключения к vk.com" + "\n");
                 CommandsList.ConsoleCommand("debug", null, this);
                 Task.Run(() => TryToRestartSystem());
                 return;
             }
 
-            Console.WriteLine($"Бот {Name} запущен.");
+            BotConsole.Write($"Бот {Name} запущен.");
 
 
             lastMessages = new List<Message>();
@@ -329,7 +335,7 @@ namespace BOT_Platform.Kernel.Bots
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
+                    BotConsole.Write($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
 
                     TryToRestartSystem();
                     Thread.Sleep(platformSett.Delay);

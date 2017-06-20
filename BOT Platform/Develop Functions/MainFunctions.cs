@@ -8,9 +8,9 @@ using VkNet.Model.RequestParams;
 using BOT_Platform;
 using System.Text.RegularExpressions;
 using VkNet.Enums.SafetyEnums;
-using BOT_Platform.Interfaces;
 using BOT_Platform.Kernel;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.Interfaces;
 using MyFunctions.Exceptions;
 
 namespace MyFunctions

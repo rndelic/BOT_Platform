@@ -1,5 +1,4 @@
-﻿using BOT_Platform.Interfaces;
-using MyFunctions.Exceptions;
+﻿using MyFunctions.Exceptions;
 using System;
 using System.Collections.Generic;
 using VkNet.Model;
@@ -8,6 +7,8 @@ using  System.Threading;
 using System.Threading.Tasks;
 using BOT_Platform.Kernel;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.CIO;
+using BOT_Platform.Kernel.Interfaces;
 
 namespace BOT_Platform
 {
@@ -68,9 +69,9 @@ namespace BOT_Platform
         {
             if (banList.ContainsKey(id))
             {
-                Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен");
-                Console.WriteLine("---------------------------------------------------------------------");
+                BotConsole.Write("---------------------------------------------------------------------");
+                BotConsole.Write("[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен");
+                BotConsole.Write("---------------------------------------------------------------------");
                 Functions.SendMessage(bot, message, "[ERROR] Пользователь https://vk.com/id" + id + " уже был забанен",
                                       message.ChatId != null);
             }
@@ -93,9 +94,9 @@ namespace BOT_Platform
 
             else
             {
-                Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine("[ERROR] Пользователь https://vk.com/id" + id + " не был ЗАбанен");
-                Console.WriteLine("---------------------------------------------------------------------");
+                BotConsole.Write("---------------------------------------------------------------------");
+                BotConsole.Write("[ERROR] Пользователь https://vk.com/id" + id + " не был ЗАбанен");
+                BotConsole.Write("---------------------------------------------------------------------");
                 Functions.SendMessage(bot, message, "[ERROR] Пользователь https://vk.com/id" + id + " не был ЗАбанен",
                                       message.ChatId != null);
             }
@@ -173,7 +174,7 @@ namespace BOT_Platform
                 {
                  commandList.Add(command, mcs);
                 }
-            else Console.WriteLine("Не удалось добавить команду \\" + command + ".\n" +
+            else BotConsole.Write("Не удалось добавить команду \\" + command + ".\n" +
                                    "Команда уже определена.\n");
         }
 
@@ -206,7 +207,7 @@ namespace BOT_Platform
                           "---------------------------------------------------------------------\n";
             Parallel.Invoke(() =>
             {
-                Console.WriteLine(text);
+                BotConsole.Write(text);
             },()=>
             {
                 Log.WriteLog(text, bot.Directory);

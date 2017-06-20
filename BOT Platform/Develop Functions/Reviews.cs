@@ -3,7 +3,6 @@ using System;
 using BOT_Platform;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
-using BOT_Platform.Interfaces;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;

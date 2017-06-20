@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using BOT_Platform.FileManager;
+using BOT_Platform.Kernel;
+using BOT_Platform.Kernel.CIO;
 
 namespace BOT_Platform
 {
@@ -31,7 +33,7 @@ namespace BOT_Platform
         {
             if (BanList is null)
             {
-                Console.WriteLine($"[{BotName}][BANLIST_ERROR]:\n" +
+                BotConsole.Write($"[{BotName}][BANLIST_ERROR]:\n" +
                                   @"Ошибка при сохранении бан-листа. Список пуст.");
                 return;
             }
@@ -50,7 +52,7 @@ namespace BOT_Platform
             }
             catch (SerializationException e)
             {
-                Console.WriteLine($"[{BotName}][BANLIST_ERROR]:\n" +
+                BotConsole.Write($"[{BotName}][BANLIST_ERROR]:\n" +
                                   @"Ошибка при сериализации: " + e.Message);
             }
             finally
@@ -72,7 +74,7 @@ namespace BOT_Platform
             }
             catch (SerializationException e)
             {
-                Console.WriteLine($"[{BotName}][BANLIST_ERROR]:\n" +
+                BotConsole.Write($"[{BotName}][BANLIST_ERROR]:\n" +
                                   @"Ошибка при десериализации: " + e.Message);
             }
             finally

@@ -15,9 +15,9 @@ using Yeti.MMedia.Mp3;
 using System.IO;
 using System.Linq;
 using MyFunctions.Exceptions;
-using BOT_Platform.Interfaces;
 using BOT_Platform.Kernel;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.Interfaces;
 
 namespace MyFunctions
 {
@@ -45,9 +45,12 @@ namespace MyFunctions
 
         public static MessagesSendParams MakeSpeechAttachment(string text, Message message, Bot bot)
         {
-            SpeechSynthesizer speechSynth = new SpeechSynthesizer(); // создаём объект
-            speechSynth.Volume = 100; // устанавливаем уровень звука
-            speechSynth.Rate = 2;
+            SpeechSynthesizer speechSynth = new SpeechSynthesizer
+            {
+                Volume = 100,
+                Rate = 2
+            }; // создаём объект
+            // устанавливаем уровень звука
             //speechSynth.SelectVoice("Microsoft Pavel Mobile");
             Functions.RemoveSpaces(ref text);
             string outFilename = String.Format(@"Data\SpeechText\{0}.waw", Guid.NewGuid());
@@ -91,8 +94,8 @@ namespace MyFunctions
                 File.Delete(outFilenameMP3);
             }
 
-            MessagesSendParams param = new MessagesSendParams();
-            param.Attachments = new ReadOnlyCollection<Audio>(audioList);
+            MessagesSendParams param = new MessagesSendParams
+            { Attachments = new ReadOnlyCollection<Audio>(audioList)};
 
             return param;
         }

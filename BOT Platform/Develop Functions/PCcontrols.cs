@@ -6,10 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using BOT_Platform;
 using VkNet.Model;
-using BOT_Platform.Interfaces;
 using VkNet.Model.RequestParams;
 using System.Collections.ObjectModel;
+using BOT_Platform.Kernel;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.CIO;
+using BOT_Platform.Kernel.Interfaces;
 using VkNet.Model.Attachments;
 using static BOT_Platform.CommandsList;
 
@@ -97,7 +99,7 @@ namespace MyFunctions
                 return;
             }
             BlockInput(true);
-            Console.WriteLine("Input ЗАблокирован.");
+            BotConsole.Write("Input ЗАблокирован.");
             Functions.SendMessage(bot, message, "Input заблокирован.", message.ChatId != null);
         }
         void UnBlock(Message message, string args, Bot bot)
@@ -108,7 +110,7 @@ namespace MyFunctions
                 return;
             }
             BlockInput(false);
-            Console.WriteLine("Input РАЗблокирован.");
+            BotConsole.Write("Input РАЗблокирован.");
             Functions.SendMessage(bot, message, "Input разблокирован.", message.ChatId != null);
         }
 
@@ -123,7 +125,7 @@ namespace MyFunctions
             bool isHibernate = System.Windows.Forms.Application.SetSuspendState(System.Windows.Forms.PowerState.Hibernate, false, false);
             if (isHibernate == false)
             {
-                Console.WriteLine("Невозможно перевести бота в спящий режим");
+                BotConsole.Write("Невозможно перевести бота в спящий режим");
                 Functions.SendMessage(bot, message, "Невозможно перевести ПК в спящий режим", message.ChatId != null);
             }
             //else Functions.SendMessage(message, "ПК был переведён в спящий режим", message.ChatId != null);

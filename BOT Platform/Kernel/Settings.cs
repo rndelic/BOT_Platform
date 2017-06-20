@@ -7,7 +7,7 @@ using System.IO;
 using VkNet;
 using VkNet.Enums.Filters;
 using System.Text.RegularExpressions;
-using BOT_Platform.Interfaces;
+using BOT_Platform.Kernel.Interfaces;
 using VkNet.Model.RequestParams;
 
 namespace BOT_Platform

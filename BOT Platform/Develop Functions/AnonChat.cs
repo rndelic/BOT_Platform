@@ -11,10 +11,12 @@ using System.Threading.Tasks;
 using BOT_Platform;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
-using BOT_Platform.Interfaces;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.Interfaces;
 using MyFunctions;
 using MyFunctions.Exceptions;
+using BOT_Platform.Kernel;
+using BOT_Platform.Kernel.CIO;
 
 namespace MyFunctions
 {
@@ -250,7 +252,7 @@ namespace MyFunctions
             }
             catch (SerializationException e)
             {
-                Console.WriteLine("[SYSTEM][ERROR]:\n" +
+                BotConsole.Write("[SYSTEM][ERROR]:\n" +
                                   "Ошибка при сериализации : " + e.Message);
             }
             finally
@@ -272,7 +274,7 @@ namespace MyFunctions
             }
             catch (SerializationException e)
             {
-                Console.WriteLine("[SYSTEM][ERROR]:\n" +
+                BotConsole.Write("[SYSTEM][ERROR]:\n" +
                                   "Ошибка при десериализации чата: " + e.Message);
             }
             finally

@@ -1,21 +1,16 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using BOT_Platform.Kernel;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.CIO;
 using MyFunctions.Exceptions;
 using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
 
-namespace BOT_Platform.Interfaces
+namespace BOT_Platform.Kernel.Interfaces
 {
     static class Functions
     {
@@ -79,7 +74,7 @@ namespace BOT_Platform.Interfaces
                 }
                 else bot.GetApi().Messages.Send(m);
             }
-            else Console.WriteLine($"(ответ){bot.Name}: " +  m.Message);
+            else BotConsole.Write($"(ответ){bot.Name}: " +  m.Message);
         }
 
         private static List<MediaAttachment> GetAttachments(Message m)
@@ -169,7 +164,7 @@ namespace BOT_Platform.Interfaces
                 }
                 else bot.GetApi().Messages.Send(msp);
             }
-            else Console.WriteLine($"(ответ){bot.Name}: " + msp.Message);
+            else BotConsole.Write($"(ответ){bot.Name}: " + msp.Message);
         }
         public static bool ContainsMessage(Message containMes, IEnumerable<Message> Messages)
         {

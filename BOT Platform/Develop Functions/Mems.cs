@@ -1,5 +1,4 @@
 ﻿using BOT_Platform;
-using BOT_Platform.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +11,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.Interfaces;
 using MyFunctions.Exceptions;
 using VkNet.Model;
 using VkNet.Model.Attachments;

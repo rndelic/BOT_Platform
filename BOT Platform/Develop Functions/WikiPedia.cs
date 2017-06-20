@@ -1,5 +1,4 @@
 ﻿using BOT_Platform;
-using BOT_Platform.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -7,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.Interfaces;
 using VkNet.Model;
 
 namespace MyFunctions

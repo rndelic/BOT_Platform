@@ -7,7 +7,6 @@ using Gif.Components;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using BOT_Platform.Interfaces;
 using VkNet.Model;
 using BOT_Platform;
 using System.Net;
@@ -17,6 +16,7 @@ using VkNet.Model.RequestParams;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.Interfaces;
 using MyFunctions.Exceptions;
 
 namespace MyFunctions

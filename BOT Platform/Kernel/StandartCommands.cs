@@ -4,13 +4,13 @@ using System.Text;
 using VkNet.Model;
 using System.Threading;
 using VkNet.Model.RequestParams;
-using BOT_Platform.Interfaces;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using BOT_Platform.Kernel;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.CIO;
 
 namespace BOT_Platform
 {
@@ -23,6 +23,7 @@ namespace BOT_Platform
             CommandsList.AddConsoleCommand("exit", new MyComandStruct("Закрыть приложение", CExit));
             CommandsList.AddConsoleCommand("cls" , new MyComandStruct("Очистить консоль", ClearConsole));
             CommandsList.AddConsoleCommand("log", new MyComandStruct("Открывает лог", СLog));
+            CommandsList.AddConsoleCommand("open", new MyComandStruct("Открывает директорию с ботом", COpen));
             CommandsList.AddConsoleCommand("settings", new MyComandStruct("Открывает файл настроек", CSettings));
             CommandsList.AddConsoleCommand("class", new MyComandStruct("Показывает текущий список Bot-классов", Classes));
             CommandsList.AddConsoleCommand("!", new MyComandStruct("Тест бота", CDebugCommand));
@@ -32,13 +33,23 @@ namespace BOT_Platform
             CommandsList.AddConsoleCommand("undebug", new MyComandStruct("Деактивирует режим отладки", CDebug));
         }
 
+        private void COpen(Message message, string args, Bot bot)
+        {
+            if (!Program.Bots.ContainsKey(args))
+            {
+                BotConsole.Write($"Бот {args} отсутствует в системе.\n");
+                return;
+            }
+            Process.Start(Program.Bots[args].Directory);
+        }
+
         private void CDebugCommand(Message message, string args, Bot bot)
         {
             string[] param = args.Split(new char[] {','}, 2, StringSplitOptions.RemoveEmptyEntries);
 
             if (!Program.Bots.ContainsKey(param[0]))
             {
-                Console.WriteLine($"Бот {param[0]} отсутствует в системе.\n");
+                BotConsole.Write($"Бот {param[0]} отсутствует в системе.\n");
                 return;
             }
             Program.Bots[param[0]].DebugExecuteCommand(param[1]);
@@ -48,7 +59,7 @@ namespace BOT_Platform
         {
             StringBuilder sB = new StringBuilder();
             sB.AppendLine("---------------------------------------------------------------------");
-            sB.AppendLine("Список загруженных ботов:");
+            sB.AppendLine($"Список загруженных ботов ({Program.Bots.Values.Count} бота(ов)) :");
             foreach (var bot in Program.Bots.Values)
             {
                                     sB.Append($"[{bot.Name}] - ");
@@ -56,7 +67,7 @@ namespace BOT_Platform
                                     sB.AppendLine($"Статус IsDebug: {bot.GetSettings().GetIsDebug().ToString().ToUpper()} ");
             }
             sB.AppendLine("---------------------------------------------------------------------");
-            Console.WriteLine(sB.ToString());
+            BotConsole.Write(sB.ToString());
         }
 
         private void Classes(Message message, string args, Bot Bot)
@@ -71,11 +82,11 @@ namespace BOT_Platform
             sB.AppendLine("Список текущих Bot-классов: ");
             foreach (Type type in typelist)
             {
-                sB.AppendLine($"- {type.Name}");
+                sB.AppendLine($"- {{{type.Name}}} Base = {{{type.BaseType.Name}}}");
             }
             sB.AppendLine("---------------------------------------------------------------------");
 
-            Console.WriteLine(sB.ToString());
+            BotConsole.Write(sB.ToString());
         }
 
         private void CSettings(Message message, string args, Bot bot)
@@ -84,7 +95,7 @@ namespace BOT_Platform
 
             if (Program.Bots.ContainsKey(args))
                 Process.Start(Path.Combine(Program.Bots[args].Directory, PlatfromSettings.PATH));
-            else Console.WriteLine($"Бот {args} отсутствует в системе.\n");
+            else BotConsole.Write($"Бот {args} отсутствует в системе.\n");
         }
 
         private void СLog(Message message, string args, Bot bot)
@@ -93,7 +104,7 @@ namespace BOT_Platform
 
             if (Program.Bots.ContainsKey(args))
                 Process.Start(Path.Combine(Program.Bots[args].Directory, CommandsList.Log.logFile));
-            else Console.WriteLine($"Бот {args} отсутствует в системе.\n");
+            else BotConsole.Write($"Бот {args} отсутствует в системе.\n");
         }
 
         public StandartCommands()
@@ -106,7 +117,7 @@ namespace BOT_Platform
             void ThreadDebug(Bot bot)
             {
                 bot.GetSettings().SetIsDebug(true);
-                Console.WriteLine(
+                BotConsole.Write(
                     "---------------------" +
                     $"Решим отладки бота [{bot.Name}] ВКЛЮЧЁН(ON)" +
                     "---------------------");
@@ -140,8 +151,8 @@ namespace BOT_Platform
                 bot.botThread.Start();
                 if (abortThread != null)
                 {
-                    Console.WriteLine($"Перезапуск потока botThread в [{bot.Name}]");
-                    Console.WriteLine(
+                    BotConsole.Write($"Перезапуск потока botThread в [{bot.Name}]");
+                    BotConsole.Write(
                         "---------------------" +
                         $"Решим отладки бота [{bot.Name}] ВЫКЛЮЧЕН(OFF)" +
                         "---------------------");
@@ -188,7 +199,7 @@ namespace BOT_Platform
             Program.consoleThread.Start();
             if (needToAbortThread != null)
             {
-                Console.WriteLine("Платформа была перезапущена!");
+                BotConsole.Write("Платформа была перезапущена!");
                 needToAbortThread.Abort("Платформа была перезапущена!");
             }
             
@@ -197,12 +208,12 @@ namespace BOT_Platform
         void CShowCommands(Message message, string args, Bot bot)
         {
             List<string> com = CommandsList.GetCommandList();
-            Console.WriteLine("------------------Список команд------------------");
+            BotConsole.Write("------------------Список команд------------------");
             foreach(string value in com)
             {
-                Console.WriteLine(value);
+                BotConsole.Write(value);
             }
-            Console.WriteLine("-------------------------------------------------\n");
+            BotConsole.Write("-------------------------------------------------\n");
         }
         void CExit(Message message, string args, Bot bot)
         {

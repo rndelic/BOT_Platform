@@ -2,15 +2,10 @@
 
 /*
  * TODO:
- * 1) Улучшить описание
  * 2) Добавить бан-лист для каждой группы
  * 7) Синхонизированный вывод
  * 8) Проверить чат, в частности, как работает уведомление о недобавлении (там return) + свой чат для каждого бота
- * 9) Перенаправление для невыполнимых функций (+)
- * 10) Фикс консоли
- * 11) Рестарт отдельного потока
  * 12) ОГРАНИЧЕНИЕ В ЧАТ НА СПЛИТ
- * 13) Action для синхронизации между ботами
  * 14) Ответ на непрочитанные
  */
 using System;
@@ -19,15 +14,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using BOT_Platform.Interfaces;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.CIO;
+using BOT_Platform.Kernel.Interfaces;
 using VkNet;
 
 namespace BOT_Platform.Kernel
 {
     static partial class Program
     {
-        //TODO: REMOVE
         public static VkApi GetApi()
         {
             return new VkApi();
@@ -59,7 +54,7 @@ namespace BOT_Platform.Kernel
             if (!Directory.Exists(GroupsBots)) Directory.CreateDirectory(GroupsBots);
             if (!Directory.Exists(OtherBots)) Directory.CreateDirectory(OtherBots);
 
-            Console.WriteLine("[Инициализация консоли...]");
+            BotConsole.Write("[Инициализация консоли...]");
             /* Подключаем стандартный модуль с базовыми командами */
             StandartCommands sC = new StandartCommands();
 
@@ -74,7 +69,7 @@ namespace BOT_Platform.Kernel
         internal static void ConsoleCommander()
         {
             /* Считываем настройки бота из файла настроек */
-            Console.WriteLine("[Загружаются параметры платформы...]");
+            BotConsole.Write("[Загружаются параметры платформы...]");
 
             if(Bots != null)
                 foreach (var bot in Bots.Values)
@@ -100,14 +95,14 @@ namespace BOT_Platform.Kernel
             {
                 try
                 {
-                    string newCommand = Console.ReadLine();
+                    string newCommand = BotConsole.Read();
                     Bot.CommandInfo info = GetCommandFromMessage(newCommand);
                     if(!String.IsNullOrEmpty(info.Command) ||
                        !String.IsNullOrEmpty(info.Param)) CommandsList.ConsoleCommand(info.Command, info.Param, null);
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine("[ERROR][SYSTEM " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
+                    BotConsole.Write("[ERROR][SYSTEM " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
                 }
             }
             
@@ -162,7 +157,7 @@ namespace BOT_Platform.Kernel
 
             try
             {
-                Console.WriteLine("[Подключение UserBots...]");
+                BotConsole.Write("[Подключение UserBots...]");
                 foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{UsersBots}"))
                     .GetDirectories())
                 {
@@ -172,8 +167,8 @@ namespace BOT_Platform.Kernel
                     UserBot bot = new UserBot(dirInfo.Name, dirInfo.FullName);
                     if (bot.InitalizeBot()) Bots.Add(dirInfo.Name, bot);
                 }
-                Console.WriteLine("Done.");
-                Console.WriteLine("[Подключение GroupsBots...]");
+                BotConsole.Write("Done.");
+                BotConsole.Write("[Подключение GroupsBots...]");
                 foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{GroupsBots}"))
                     .GetDirectories())
                 {
@@ -183,8 +178,8 @@ namespace BOT_Platform.Kernel
                     GroupBot bot = new GroupBot(dirInfo.Name, dirInfo.FullName);
                     if (bot.InitalizeBot()) Bots.Add(dirInfo.Name, bot);
                 }
-                Console.WriteLine("Done.");
-                Console.WriteLine("[Подключение OthersBots...]");
+                BotConsole.Write("Done.");
+                BotConsole.Write("[Подключение OthersBots...]");
                 foreach (DirectoryInfo dirInfo in (new DirectoryInfo(Environment.CurrentDirectory + $"\\{OtherBots}"))
                     .GetDirectories())
                 {
@@ -217,27 +212,27 @@ namespace BOT_Platform.Kernel
                         }
                         else
                         {
-                            Console.WriteLine("---------------------------------------------------------------------");
-                            Console.WriteLine($"[REFLECTION ERROR] Класс " +
+                            BotConsole.Write("---------------------------------------------------------------------");
+                            BotConsole.Write($"[REFLECTION ERROR] Класс " +
                                               $"{dirInfo.Name.Substring(1, dirInfo.Name.IndexOf(']') - 1)} не найден");
-                            Console.WriteLine("---------------------------------------------------------------------");
+                            BotConsole.Write("---------------------------------------------------------------------");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("---------------------------------------------------------------------");
-                        Console.WriteLine($"[ERROR] Ошибка в записи {dirInfo.Name}: {ex.Message}");
-                        Console.WriteLine("---------------------------------------------------------------------");
+                        BotConsole.Write("---------------------------------------------------------------------");
+                        BotConsole.Write($"[ERROR] Ошибка в записи {dirInfo.Name}: {ex.Message}");
+                        BotConsole.Write("---------------------------------------------------------------------");
                     }
                 }
-                Console.WriteLine("Done.");
+                BotConsole.Write("Done.");
             }
             catch {}
             if (!Bots.ContainsKey(MainBot))
             {
-                Console.WriteLine("---------------------------------------------------------------------");
-                Console.WriteLine($"[FATAL ERROR] Не удалось подключить {MainBot}, многие функции могут быть недоступны.\n");
-                Console.WriteLine("---------------------------------------------------------------------");
+                BotConsole.Write("---------------------------------------------------------------------");
+                BotConsole.Write($"[FATAL ERROR] Не удалось подключить {MainBot}, многие функции могут быть недоступны.\n");
+                BotConsole.Write("---------------------------------------------------------------------");
             }
         }
 
@@ -246,17 +241,17 @@ namespace BOT_Platform.Kernel
         /// </summary>
         static void ExecuteModules()
         {
-            Console.WriteLine("[Подключение модулей...]");
+            BotConsole.Write("[Подключение модулей...]");
 
             /* Подключаем модули, создавая обьекты их классов */
             Type[] typelist = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == DevNamespace).ToArray();
             foreach (Type type in typelist)
             {
                 Activator.CreateInstance(Type.GetType(type.FullName));
-                Console.WriteLine("Подключение " + type.FullName + "...");
+                BotConsole.Write("Подключение " + type.FullName + "...");
             }
 
-            Console.WriteLine("Модули подключены.");
+            BotConsole.Write("Модули подключены.");
         }
 
     }

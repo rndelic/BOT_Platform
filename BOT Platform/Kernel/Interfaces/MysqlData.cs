@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MySql.Data.MySqlClient;
-using MySql.Data;
 using System.Data;
 using System.Windows.Forms;
+using MySql.Data.MySqlClient;
 
-namespace BOT_Platform
+namespace BOT_Platform.Kernel.Interfaces
 {
     class MysqlData
     {
