@@ -16,6 +16,9 @@ using NCron.Service;
 using NCron.Fluent.Crontab;
 using VkNet.Model;
 using Message = VkNet.Model.Message;
+//hello yea
+using System.Data; 
+
 
 namespace BOT_Platform.Kernel.Bots
 {
