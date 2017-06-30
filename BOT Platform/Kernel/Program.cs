@@ -18,6 +18,7 @@ using BOT_Platform.Kernel.Bots;
 using BOT_Platform.Kernel.CIO;
 using BOT_Platform.Kernel.Interfaces;
 using VkNet;
+using System.Text;
 
 namespace BOT_Platform.Kernel
 {
@@ -50,6 +51,8 @@ namespace BOT_Platform.Kernel
 
         public static void Main()
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             if (!Directory.Exists(UsersBots)) Directory.CreateDirectory(UsersBots);
             if (!Directory.Exists(GroupsBots)) Directory.CreateDirectory(GroupsBots);
             if (!Directory.Exists(OtherBots)) Directory.CreateDirectory(OtherBots);

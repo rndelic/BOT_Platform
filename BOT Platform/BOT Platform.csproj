@@ -51,7 +51,7 @@
     <StartupObject>BOT_Platform.Kernel.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>AppInfo\app.manifest</ApplicationManifest>
@@ -86,7 +86,7 @@
     <ManifestKeyFile>BOT Platform_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Develop Functions\CognitiveService.cs" />
+    <Compile Include="Develop Functions\SoTestMuchWow.cs" />
     <Compile Include="Kernel\Banlist.cs" />
     <Compile Include="Kernel\BotConsole.cs" />
     <Compile Include="Kernel\Bots\Bots.cs" />
