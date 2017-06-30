@@ -17,6 +17,7 @@ using NCron.Fluent.Crontab;
 using VkNet.Model;
 using Message = VkNet.Model.Message;
 
+
 namespace BOT_Platform.Kernel.Bots
 {
     class WeatherBot : UserBot
