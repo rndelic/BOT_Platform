@@ -30,7 +30,7 @@ namespace MyFunctions
 
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("комбо", new MyComandStruct("описание команды", Combine, true));
+            CommandsList.TryAddCommand("комбо", new MyComandStruct("Заменяет все лица из первого фото на вторую картинку", Combine));
             CommandsList.TryAddCommand("эмоция", new MyComandStruct("описание команды", FEmoji, true));
         }
 
@@ -81,7 +81,7 @@ namespace MyFunctions
                 case "комбо":
                     info =
                         $"Справка по команде \"{message.Body}\":\n\n" +
-                        "Команда ззаменяет все лица на первом прикреплённом к сообщению фото на изображение со второй картинки.\n\n" +
+                        "Команда заменяет все лица на первом прикреплённом к сообщению фото на изображение со второй картинки.\n\n" +
                         "Внимание! Если лица не будут обнаружены, бот не сможет выполнить команду.";
                     break;
             }

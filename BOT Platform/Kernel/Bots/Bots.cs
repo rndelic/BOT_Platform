@@ -79,7 +79,7 @@ namespace BOT_Platform.Kernel.Bots
         {
             return platformSett;
         }
-
+        
         protected int currentTimerTime = 0;
         protected  List<Message> lastMessages;
 
@@ -89,6 +89,7 @@ namespace BOT_Platform.Kernel.Bots
         /// </summary>
         public virtual void BotWork()
         {
+       
             /* Подключаемся к VK, запускаем бота */
             try
             {
