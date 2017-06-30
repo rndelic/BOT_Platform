@@ -54,7 +54,7 @@ namespace BOT_Platform.Kernel.Interfaces
             if (isChat == true)
             {
                 m.ChatId = message.ChatId;
-                m.ForwardMessages = new long[1] { message.Id.Value };
+                if (message.Id != null) m.ForwardMessages = new long[1] { message.Id.Value };
                 //m.Attachments = needAttachments ? GetAttachments(message) : null;
             }
             else m.UserId = message.UserId;
@@ -145,7 +145,7 @@ namespace BOT_Platform.Kernel.Interfaces
             if (isChat)
             {
                 msp.ChatId = m.ChatId;
-                msp.ForwardMessages = new long[1] { m.Id.Value };
+                if(m.Id != null) msp.ForwardMessages = new long[1] { m.Id.Value };
             }
             else msp.UserId = m.UserId;
 

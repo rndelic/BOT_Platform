@@ -64,6 +64,7 @@ namespace BOT_Platform
             {
                                     sB.Append($"[{bot.Name}] - ");
                                     sB.Append($"Тип: {bot.GetType().Name}, ");
+                                    sB.Append($"Базовый тип: {bot.GetType().BaseType.Name}, ");
                                     sB.AppendLine($"Статус IsDebug: {bot.GetSettings().GetIsDebug().ToString().ToUpper()} ");
             }
             sB.AppendLine("---------------------------------------------------------------------");

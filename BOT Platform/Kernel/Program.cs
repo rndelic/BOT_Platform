@@ -54,6 +54,10 @@ namespace BOT_Platform.Kernel
             if (!Directory.Exists(GroupsBots)) Directory.CreateDirectory(GroupsBots);
             if (!Directory.Exists(OtherBots)) Directory.CreateDirectory(OtherBots);
 
+            BotConsole.Write("---------------------------------------------------------------------");
+            BotConsole.Write($"BOT_Platfrom v{Assembly.GetExecutingAssembly().GetName().Version.ToString()}");
+            BotConsole.Write("---------------------------------------------------------------------");
+
             BotConsole.Write("[Инициализация консоли...]");
             /* Подключаем стандартный модуль с базовыми командами */
             StandartCommands sC = new StandartCommands();

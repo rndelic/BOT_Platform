@@ -13,6 +13,7 @@ using System.Threading;
 using BOT_Platform.Kernel.Bots;
 using BOT_Platform.Kernel.Interfaces;
 using MyFunctions.Exceptions;
+using Newtonsoft.Json;
 using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
@@ -30,6 +31,9 @@ namespace MyFunctions
         private void MakeMem(Message message, string args, Bot bot)
         {
             if (NeedCommandInfo(message, args, bot)) return;
+
+             string path = Path.Combine(bot.Directory, DIRECTORY_PATH);
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             List<Photo> photoList = new List<Photo>();
             string[] text = args.Split(SEPARATOR, 2, StringSplitOptions.RemoveEmptyEntries)
@@ -56,7 +60,7 @@ namespace MyFunctions
             }
             if (message.Attachments.Count > 1)
             {
-                Functions.SendMessage(bot, message, "А не многовато ли картинок? Оставь одну, и, так уж и быть, я сделаю тебе мемасик.", message.ChatId != null);
+                Functions.SendMessage(bot, message, "А не многовато ли вложений? Оставь одно, и, так уж и быть, я сделаю тебе мемасик.", message.ChatId != null);
                 return;
             }
 
@@ -81,7 +85,7 @@ namespace MyFunctions
             {
                 loadedBitmap = new Bitmap(responseStream);
             }
-            string outFilename = DrawAndSave((Image)loadedBitmap, text);
+            string outFilename = DrawAndSave((Image)loadedBitmap, text, bot.Directory);
             loadedBitmap.Dispose();
 
             photoList.Add(Functions.UploadImageInMessage(outFilename, bot));
@@ -89,7 +93,7 @@ namespace MyFunctions
             File.Delete(outFilename);
         }
 
-        string DrawAndSave(Image image, string[] text, float mlp = 1.1f)
+        string DrawAndSave(Image image, string[] text, string botDirectory, float mlp = 1.1f)
         {
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
@@ -156,7 +160,9 @@ namespace MyFunctions
 
                 //g.Flush(FlushIntention.Sync);
             }
-            string outFilename = String.Format(@"Data\Mems\{0}.png", Guid.NewGuid());
+            string outFilename =
+                Path.Combine(botDirectory, Path.Combine(DIRECTORY_PATH,
+                    String.Format("{0}.png", Guid.NewGuid())));
 
             graphics.Dispose();
             image.Save(outFilename);

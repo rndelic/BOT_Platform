@@ -12,15 +12,28 @@ namespace BOT_Platform.Kernel.Bots
 
     public abstract class Bot
     {
+        /// <summary>
+        /// Имя бота в системе
+        /// </summary>
         public string Name { get; private set; }
+        /// <summary>
+        /// Физический полный пусть к боту
+        /// </summary>
         public string Directory { get; private set; }
+        /// <summary>
+        /// </summary>
+        /// <param name="name">Имя бота в системе</param>
+        /// <param name="directory">Физический полный путь к боту</param>
         public Bot(string name, string directory)
         {
             Name = name;
             Directory = directory;
             _app = new VkApi();
         }
-
+        /// <summary>
+        /// Получить список пользователей с правами
+        /// администратора для этого бота
+        /// </summary>
         public long[] GetAdmins
         {
             get
@@ -28,7 +41,11 @@ namespace BOT_Platform.Kernel.Bots
                 return platformSett.Admins;
             }
         }
-
+        /// <summary>
+        /// Загрузка параметров бота из файла настроек,
+        /// указанного по физическому пути бота
+        /// </summary>
+        /// <returns></returns>
         public virtual bool InitalizeBot()
         {
             try
@@ -44,9 +61,15 @@ namespace BOT_Platform.Kernel.Bots
             }
             return true;
         }
-
+        /// <summary>
+        /// Поток бота
+        /// </summary>
         public Thread botThread;
-        protected  volatile VkApi _app;      /* Обьект самого приложения VK.NET */
+        /// <summary>
+        /// Обьект для работы с VK API
+        /// (Обьект самого приложения VK.NET)
+        /// </summary>
+        protected volatile VkApi _app;    
         public VkApi GetApi()
         {
             return _app;

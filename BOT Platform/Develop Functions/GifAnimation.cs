@@ -29,7 +29,6 @@ namespace MyFunctions
         public GifAnimation()
         {
             AddMyCommandInPlatform();
-            if (!Directory.Exists(DIRECTORY_PATH)) Directory.CreateDirectory(DIRECTORY_PATH);
         }
 
         public void AddMyCommandInPlatform()
@@ -40,6 +39,9 @@ namespace MyFunctions
         private void MakeGif(Message message, string args, Bot bot)
         {
             if (NeedCommandInfo(message, args, bot)) return;
+
+            string path = Path.Combine(bot.Directory, DIRECTORY_PATH);
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             if (message.Attachments.Count <= 1)
             {
@@ -84,7 +86,7 @@ namespace MyFunctions
                 SIZE_HEIGHT += images[i].Height;
                 SIZE_WIDTH += images[i].Width;
             });
-            string outFilename = ToGif(Convert.ToInt32(args), images);
+            string outFilename = ToGif(Convert.ToInt32(args), bot.Directory, images);
             List<Document> docList = new List<Document>();
 
             try
@@ -103,10 +105,12 @@ namespace MyFunctions
         private int SIZE_HEIGHT = 0;
         private int SIZE_WIDTH = 0;
 
-        string ToGif(int delay, Image[] images)
+        string ToGif(int delay, string botDirectory, Image[] images)
         {
             AnimatedGifEncoder e = new AnimatedGifEncoder();
-            string outFilename = String.Format(@"Data\Gifs\{0}.gif", Guid.NewGuid());
+            string outFilename = 
+                Path.Combine(botDirectory,Path.Combine(DIRECTORY_PATH,
+                                                        String.Format("{0}.gif", Guid.NewGuid())));
             e.Start(outFilename);
             e.SetDelay(delay);
             //-1:no repeat,0:always repeat
