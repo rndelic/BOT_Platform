@@ -16,7 +16,7 @@ using NCron.Service;
 using NCron.Fluent.Crontab;
 using VkNet.Model;
 using Message = VkNet.Model.Message;
-//hello yea
+//hello yea 22
 using System.Data; 
 
 
