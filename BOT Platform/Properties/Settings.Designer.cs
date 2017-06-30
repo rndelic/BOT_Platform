@@ -25,7 +25,7 @@ namespace BOT_Platform.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"@""[LOGIN]	   
+        [global::System.Configuration.DefaultSettingValueAttribute(@"[LOGIN]	   
 [PASSWORD] 
 [APP_ID]  	$id приложения $
 
@@ -45,7 +45,7 @@ namespace BOT_Platform.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"@""[TOKEN]	   
+        [global::System.Configuration.DefaultSettingValueAttribute(@"[TOKEN]	   
 [APP_ID]   	$id приложения $
 
 [PAUSE]     1000

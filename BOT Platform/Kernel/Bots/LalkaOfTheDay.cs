@@ -23,7 +23,6 @@ namespace BOT_Platform.Kernel.Bots
         public LalkaOfTheDay() : base(null, null)
         {
         }
-        //7 по лабе =  10 по ноуту
         private string time = $"0 21 * * *";
 
         public override void BotWork()

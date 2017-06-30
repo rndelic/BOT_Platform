@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BOT_Platform.Kernel.Bots;
+using BOT_Platform.Kernel.CIO;
 using VkNet.Model;
 
 namespace BOT_Platform.Kernel.Bots
@@ -18,14 +19,36 @@ namespace BOT_Platform.Kernel.Bots
         {
         }
 
-        protected override void ExecuteCommand(MessagesGetObject messages)
+        public override void BotWork()
         {
-            Parallel.ForEach(messages.Messages, Message =>
+            try
+            {
+                BotConsole.Write($"[Запуск бота {Name}...]");
+                _app.Authorize(platformSett.AuthParams);
+                BotConsole.Write($"Бот {Name} запущен.");
+            }
+            catch (Exception ex)
+            {
+                BotConsole.Write($"[ERROR][{Name}]:\n" + ex.Message + "\n");
+                CommandsList.ConsoleCommand("debug", null, this);
+                Task.Run(() => TryToRestartSystem());
+                return;
+            }
+
+            string TITLE = "ЗА МАТАН И ДВОР ИНТЕГРИРУЮ В УПОР";
+            while (true)
+            {
+                try
                 {
-                    if (String.IsNullOrEmpty(Message.Body) || Message.ChatId == null) return; 
+                    if (_app.Messages.GetChat(7).Title != TITLE)
+                        _app.Messages.EditChat(7, TITLE);
+                    Thread.Sleep(200);
                 }
-            );
-            Thread.Sleep(platformSett.Delay);
+                catch
+                {
+                    Thread.Sleep(200);
+                }
+            }
         }
     }
 }
