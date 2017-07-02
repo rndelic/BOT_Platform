@@ -30,7 +30,7 @@ namespace MyFunctions
 
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("отзыв", new MyComandStruct("", AddReview));
+            CommandsList.TryAddCommand("отзыв", new MyCommandStruct("", AddReview));
         }
 
         private void AddReview(Message message, object[] p)

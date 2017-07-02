@@ -26,17 +26,17 @@ namespace MyFunctions
 
     public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("сон", new MyComandStruct(
+            CommandsList.TryAddCommand("сон", new MyCommandStruct(
                                        "дистанционно выключить ПК", OffPC, true));
-            CommandsList.TryAddCommand("бан", new MyComandStruct(
+            CommandsList.TryAddCommand("бан", new MyCommandStruct(
                                        "бан юзера", Ban, true));
-            CommandsList.TryAddCommand("разбан", new MyComandStruct(
+            CommandsList.TryAddCommand("разбан", new MyCommandStruct(
                                        "разбан юзера", UnBan, true));
-            CommandsList.TryAddCommand("блок", new MyComandStruct(
+            CommandsList.TryAddCommand("блок", new MyCommandStruct(
                                        "блокировать ввод", Block, true));
-            CommandsList.TryAddCommand("разблок", new MyComandStruct(
+            CommandsList.TryAddCommand("разблок", new MyCommandStruct(
                                        "разблокировать ввод", UnBlock, true));
-            CommandsList.TryAddCommand("лог", new MyComandStruct(
+            CommandsList.TryAddCommand("лог", new MyCommandStruct(
                                        "отправляет лог-файл", SendLog, true));
         }
 

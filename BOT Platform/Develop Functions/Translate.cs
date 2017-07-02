@@ -19,7 +19,7 @@ namespace MyFunctions
     {
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("перевод", new MyComandStruct("Переводит обьект (alfa).", TranslateIt, true));
+            CommandsList.TryAddCommand("перевод", new MyCommandStruct("Переводит обьект (alfa).", TranslateIt, true));
         }
 
         private void TranslateIt(Message message, string args, Bot bot)

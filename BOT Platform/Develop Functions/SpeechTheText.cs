@@ -30,7 +30,7 @@ namespace MyFunctions
 
         public void AddMyCommandInPlatform()
         { 
-            CommandsList.TryAddCommand("произнеси", new MyComandStruct("Возвращает аудиозапись с озвученным текстом", Speech));
+            CommandsList.TryAddCommand("произнеси", new MyCommandStruct("Возвращает аудиозапись с озвученным текстом", Speech));
         }
 
         public static void Speech(Message message, string args, Bot bot)

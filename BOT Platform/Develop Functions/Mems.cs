@@ -26,7 +26,7 @@ namespace MyFunctions
         private char[] SEPARATOR = new char[] {'\n'};
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("мем", new MyComandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
+            CommandsList.TryAddCommand("мем", new MyCommandStruct("Делает мемасик с подписью (не забудьте прикрепить картинку)", MakeMem));
         }
         private void MakeMem(Message message, string args, Bot bot)
         {

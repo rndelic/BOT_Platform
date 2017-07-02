@@ -36,7 +36,7 @@ namespace BOT_Platform.Properties {
 [BNAME]     бот, Бот
 [BMESMEM]   30
 
-[ADMIN_LIST] """)]
+[ADMIN_LIST] ")]
         public string SettingsTemplateUserBot {
             get {
                 return ((string)(this["SettingsTemplateUserBot"]));
@@ -55,7 +55,7 @@ namespace BOT_Platform.Properties {
 [BNAME]    бот,Бот
 [BMESMEM]  30
 
-[ADMIN_LIST] """)]
+[ADMIN_LIST] ")]
         public string SettingsTemplateGroupBot {
             get {
                 return ((string)(this["SettingsTemplateGroupBot"]));

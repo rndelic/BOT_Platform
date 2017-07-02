@@ -19,18 +19,18 @@ namespace BOT_Platform
         private const string BOTS_NAMESPACE = "BOT_Platform.Kernel.Bots";
         public void AddMyCommandInPlatform()
         {
-            CommandsList.AddConsoleCommand("help", new MyComandStruct("Показывает список всех комманд",CShowCommands));
-            CommandsList.AddConsoleCommand("exit", new MyComandStruct("Закрыть приложение", CExit));
-            CommandsList.AddConsoleCommand("cls" , new MyComandStruct("Очистить консоль", ClearConsole));
-            CommandsList.AddConsoleCommand("log", new MyComandStruct("Открывает лог", СLog));
-            CommandsList.AddConsoleCommand("open", new MyComandStruct("Открывает директорию с ботом", COpen));
-            CommandsList.AddConsoleCommand("settings", new MyComandStruct("Открывает файл настроек", CSettings));
-            CommandsList.AddConsoleCommand("class", new MyComandStruct("Показывает текущий список Bot-классов", Classes));
-            CommandsList.AddConsoleCommand("!", new MyComandStruct("Тест бота", CDebugCommand));
-            CommandsList.AddConsoleCommand("restart", new MyComandStruct("Перезапуск системы", CRestart));
-            CommandsList.AddConsoleCommand("bots", new MyComandStruct("Список ботов", CBots));
-            CommandsList.AddConsoleCommand("debug", new MyComandStruct("Активирует режим отладки", CDebug));
-            CommandsList.AddConsoleCommand("undebug", new MyComandStruct("Деактивирует режим отладки", CDebug));
+            CommandsList.AddConsoleCommand("help", new MyCommandStruct("Показывает список всех комманд",CShowCommands));
+            CommandsList.AddConsoleCommand("exit", new MyCommandStruct("Закрыть приложение", CExit));
+            CommandsList.AddConsoleCommand("cls" , new MyCommandStruct("Очистить консоль", ClearConsole));
+            CommandsList.AddConsoleCommand("log", new MyCommandStruct("Открывает лог", СLog));
+            CommandsList.AddConsoleCommand("open", new MyCommandStruct("Открывает директорию с ботом", COpen));
+            CommandsList.AddConsoleCommand("settings", new MyCommandStruct("Открывает файл настроек", CSettings));
+            CommandsList.AddConsoleCommand("class", new MyCommandStruct("Показывает текущий список Bot-классов", Classes));
+            CommandsList.AddConsoleCommand("!", new MyCommandStruct("Тест бота", CDebugCommand));
+            CommandsList.AddConsoleCommand("restart", new MyCommandStruct("Перезапуск системы", CRestart));
+            CommandsList.AddConsoleCommand("bots", new MyCommandStruct("Список ботов", CBots));
+            CommandsList.AddConsoleCommand("debug", new MyCommandStruct("Активирует режим отладки", CDebug));
+            CommandsList.AddConsoleCommand("undebug", new MyCommandStruct("Деактивирует режим отладки", CDebug));
         }
 
         private void COpen(Message message, string args, Bot bot)

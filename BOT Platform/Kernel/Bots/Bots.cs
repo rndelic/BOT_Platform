@@ -70,11 +70,22 @@ namespace BOT_Platform.Kernel.Bots
         /// (Обьект самого приложения VK.NET)
         /// </summary>
         protected volatile VkApi _app;    
+        /// <summary>
+        /// Возвращает обьект для работы с VK API
+        /// </summary>
+        /// <returns></returns>
         public VkApi GetApi()
         {
             return _app;
         }
+        /// <summary>
+        /// Настройки бота
+        /// </summary>
         protected volatile PlatfromSettings platformSett; /* Здесь хранятся все настройки бота */
+        /// <summary>
+        /// Возвращает настройки бота
+        /// </summary>
+        /// <returns></returns>
         public  PlatfromSettings GetSettings()
         {
             return platformSett;
@@ -137,6 +148,9 @@ namespace BOT_Platform.Kernel.Bots
             }
 
         }
+        /// <summary>
+        /// Пытается подключиться к vk.com в случае потери соединения и перезагружает бота в случае необходимости
+        /// </summary>
         protected void TryToRestartSystem()
         {
             if(!platformSett.GetIsDebug())
@@ -163,6 +177,10 @@ namespace BOT_Platform.Kernel.Bots
                 CommandsList.ConsoleCommand("undebug", null, this);
             }
         }
+        /// <summary>
+        /// Определяет, каким образом будет обрабатываться команда
+        /// </summary>
+        /// <param name="messages">Список последних сообщений, полученных ботом</param>
         protected virtual void ExecuteCommand(MessagesGetObject messages)
         {
             Parallel.ForEach(messages.Messages, Message =>
@@ -198,6 +216,10 @@ namespace BOT_Platform.Kernel.Bots
             );
             Thread.Sleep(platformSett.Delay);
         }
+        /// <summary>
+        /// Определяет, каким образом будет обрабатываться команда в DebugMode бота
+        /// </summary>
+        /// <param name="consoleCommand">команда</param>
         public virtual void DebugExecuteCommand(string consoleCommand)
         {
             Task.Run(() =>

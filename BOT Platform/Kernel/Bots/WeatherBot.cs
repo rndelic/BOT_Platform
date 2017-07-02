@@ -1,26 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using BOT_Platform.Kernel.CIO;
 using BOT_Platform.Kernel.Interfaces;
-using NCron;
-using NCron.Fluent;
 using NCron.Service;
 using NCron.Fluent.Crontab;
-using VkNet.Model;
 using Message = VkNet.Model.Message;
 
 
 namespace BOT_Platform.Kernel.Bots
 {
-    class WeatherBot : UserBot
+    sealed class WeatherBot : UserBot
     {
         public WeatherBot(string botName, string directory) : base(botName, directory)
         { }
@@ -28,8 +21,8 @@ namespace BOT_Platform.Kernel.Bots
         public WeatherBot() : base(null, null)
         {
         }
-        // 24 по лабе =  20 по ноуту
-        private string time = $"0 9 * * *"; 
+        // 24 по лабе =  21 по ноуту
+        private string time = $"0 9 * * *";
 
         public override void BotWork()
         {
@@ -57,7 +50,7 @@ namespace BOT_Platform.Kernel.Bots
                 BotConsole.Write($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]:\n" + ex.Message + "\n");
                 if (ex.Message == "User authorization failed: access_token has expired.")
                 {
-                    this._app.RefreshToken();
+                    _app.RefreshToken();
                     BotConsole.Write($"[ERROR][{Name} " + DateTime.Now.ToLongTimeString() + "]: Токен обновлён.\n");
                 }
                 else TryToRestartSystem();
@@ -104,9 +97,10 @@ namespace BOT_Platform.Kernel.Bots
                     string temp = new Regex(@"<span class=""temperature"">(?<temp>[^<]+)").Match(data).Groups["temp"].Value.Replace(@"&deg;", "°");
                     string osadki = new Regex(@"<td class=""title"">Облачность:</td>[^<]*?<td>(?<osadki>[^<]+)</td>").Match(data).Groups["osadki"].Value;
                     return (town + "\n🌡 Температура воздуха: " + temp + "\n☔️ Осадки: " + osadki);
-                    Console.ReadLine();
                 }
             }
         }
     }
 }
+
+

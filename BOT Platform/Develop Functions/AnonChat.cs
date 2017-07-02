@@ -24,12 +24,12 @@ namespace MyFunctions
     {
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("анонимный чат", new MyComandStruct("Чтобы создать чат, отправьте боту команду бот," +
+            CommandsList.TryAddCommand("анонимный чат", new MyCommandStruct("Чтобы создать чат, отправьте боту команду бот," +
                 " анонимный чат(\"название чата в кавычках!\", ссылки на анонимных собеседников " +
                 "(не более " + countOfUsers + " пользователей) )\n" +
                 "Учтите, что ваши имена будут скрыты. Be secure.", StartChat));
 
-            CommandsList.TryAddCommand("мои чаты", new MyComandStruct("Список анонимных чатов, в которых состоит пользователь", MyChats));
+            CommandsList.TryAddCommand("мои чаты", new MyCommandStruct("Список анонимных чатов, в которых состоит пользователь", MyChats));
         }
 
         private void MyChats(Message message, string args, Bot bot)

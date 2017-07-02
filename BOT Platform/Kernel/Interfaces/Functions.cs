@@ -14,6 +14,10 @@ namespace BOT_Platform.Kernel.Interfaces
 {
     static class Functions
     {
+        /// <summary>
+        /// Удаляет пробелы из начала и конца строки
+        /// </summary>
+        /// <param name="str">Ссылка на строку, в которой необходимо убрать пробелы</param>
         public static void RemoveSpaces(ref string str)
         {
             //удаляем пробелы с начала
@@ -29,6 +33,11 @@ namespace BOT_Platform.Kernel.Interfaces
             if (j != str.Length - 1) str = str.Remove(j + 1);
 
         }
+        /// <summary>
+        /// Удаляет пробелы из начала и конца строки
+        /// </summary>
+        /// <param name="str">Строка, в которой необходимо убрать пробелы</param>
+        /// <returns>Строка без пробелов в начале и конце</returns>
         public static string RemoveSpaces(string str)
         {
             //удаляем пробелы с начала
@@ -45,7 +54,15 @@ namespace BOT_Platform.Kernel.Interfaces
 
             return str;
         }
-        
+        /// <summary>
+        /// Отправляет сообщение с вложениями в чат
+        /// </summary>
+        /// <param name="bot">Бот, который должен отправить сообщение</param>
+        /// <param name="message">Сообщение, в котором находятся UserId и ChatId</param>
+        /// <param name="m">Параметры сообщения, содержащие вложения</param>
+        /// <param name="body">Текст сообщения</param>
+        /// <param name="isChat">Если true и ChatId != null - бот отправляет сообщение в чат</param>
+        /// <param name="needAttachments">(Необязательный параметр) Только для модуля SpeechTheText</param>
         public static void SendMessage(Bot bot, Message message, MessagesSendParams m, 
             string body, bool isChat = false, bool needAttachments = false)
         {
@@ -76,7 +93,11 @@ namespace BOT_Platform.Kernel.Interfaces
             }
             else BotConsole.Write($"(ответ){bot.Name}: " +  m.Message);
         }
-
+        /// <summary>
+        /// Получить все вложения в сообщении
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns>Список вложений</returns>
         private static List<MediaAttachment> GetAttachments(Message m)
         {
             List<MediaAttachment> mediaAttachments = new List<MediaAttachment>();
@@ -132,6 +153,14 @@ namespace BOT_Platform.Kernel.Interfaces
             }
             return mediaAttachments;
         }
+        /// <summary>
+        /// Отправляет сообщение в чат
+        /// </summary>
+        /// <param name="bot">Бот, который должен отправить сообщение</param>
+        /// <param name="m">Сообщение, в котором находятся UserId и ChatId</param>
+        /// <param name="message">Текст сообщения</param>
+        /// <param name="isChat">Если true и ChatId != null - бот отправляет сообщение в чат</param>
+        /// <param name="needAttachments">(Необязательный параметр) Только для модуля SpeechTheText</param>
         public static void SendMessage(Bot bot, Message m,
             string message, bool isChat = false, bool needAttachments = false)
         {
@@ -166,6 +195,12 @@ namespace BOT_Platform.Kernel.Interfaces
             }
             else BotConsole.Write($"(ответ){bot.Name}: " + msp.Message);
         }
+        /// <summary>
+        /// Содержится ли данное сообщение в списке
+        /// </summary>
+        /// <param name="containMes">Сообщение, которое нужно проверить</param>
+        /// <param name="Messages">Список сообщений</param>
+        /// <returns>true - если сообщение обнаружено в списке</returns>
         public static bool ContainsMessage(Message containMes, IEnumerable<Message> Messages)
         {
             bool contains = false;
@@ -181,6 +216,14 @@ namespace BOT_Platform.Kernel.Interfaces
             }
             return contains; 
         }
+        /// <summary>
+        /// Получить id пользователя по ссылке на его страницу 
+        /// </summary>
+        /// <param name="url">Ссылка на пользователя</param>
+        /// <param name="bot">С какого бота проверить ссылку (работает только для UserBot)
+        /// В противном случае поиск id выполнит бот по умолчанию
+        /// </param>
+        /// <returns>id пользователя</returns>
         public static string GetUserId(string url, Bot bot)
         {
             string GetUrlWithApi(string _url)
@@ -227,6 +270,10 @@ namespace BOT_Platform.Kernel.Interfaces
             }
             return url;
         }
+        /// <summary>
+        /// Заменяет все служебные символы в url на их коды
+        /// </summary>
+        /// <param name="s">Ссылка на url </param>
         public static void CheckURL(ref string s)
         {
            s = s.Replace(" ", "%20")
@@ -236,6 +283,11 @@ namespace BOT_Platform.Kernel.Interfaces
                 .Replace(",", "%2C")
                 .Replace("/", "%2F");
         }
+        /// <summary>
+        /// Заменяет все служебные символы в url на их коды
+        /// </summary>
+        /// <param name="s">Ссылка на url </param>
+        /// <returns>Строка с заменёнными служебными символами</returns>
         public static string CheckURL(string s)
         {
             return s.Replace(" ", "%20")
@@ -245,6 +297,12 @@ namespace BOT_Platform.Kernel.Interfaces
                  .Replace(",", "%2C")
                  .Replace("/", "%2F");
         }
+        /// <summary>
+        /// Загрузить изображение во вложения сообщения
+        /// </summary>
+        /// <param name="photoName">полный путь к файлу изображения</param>
+        /// <param name="bot">бот, который должен выполнить загрузку</param>
+        /// <returns>Экземпляр загруженного изображения</returns>
         public static Photo UploadImageInMessage(string photoName, Bot bot)
         {
             var uploadServer = bot.GetApi().Photo.GetMessagesUploadServer();
@@ -254,7 +312,13 @@ namespace BOT_Platform.Kernel.Interfaces
             // Сохранить загруженную фотографию
             return bot.GetApi().Photo.SaveMessagesPhoto(responseImg)[0];
         }
-
+        /// <summary>
+        /// Загрузить документ во вложения сообщения
+        /// </summary>
+        /// <param name="filename">Полный путь к файлу документа</param>
+        /// <param name="docName">Название документа в ВК</param>
+        /// <param name="bot">бот, который должен выполнить загрузку</param>
+        /// <returns>Экземпляр документа</returns>
         public static Document UploadDocumentInMessage(string filename, string docName, Bot bot)
         {
             UploadServerInfo uploadServer;

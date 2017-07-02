@@ -15,7 +15,7 @@ namespace MyFunctions
     {
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("вики", new MyComandStruct("Находит статью в википедии по запросу", FindWiki));
+            CommandsList.TryAddCommand("вики", new MyCommandStruct("Находит статью в википедии по запросу", FindWiki));
         }
 
         private void FindWiki(Message message, string args, Bot bot)

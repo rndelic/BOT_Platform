@@ -22,18 +22,8 @@ using System.Text;
 
 namespace BOT_Platform.Kernel
 {
-    static partial class Program
+    internal static partial class Program
     {
-        public static VkApi GetApi()
-        {
-            return new VkApi();
-        }
-
-        public static PlatfromSettings GetSettings()
-        {
-            return null;
-        }
-
         const string DevNamespace = "MyFunctions";   /* Пространоство имён, содержащее только
                                                       * пользовательские функции
                                                       */
@@ -45,6 +35,9 @@ namespace BOT_Platform.Kernel
 
         public const string MainBot = "MainBot";
 
+        /// <summary>
+        /// Словарь всех ботов в системе
+        /// </summary>
         public static volatile Dictionary<string, Bot> Bots;
 
         internal static Thread consoleThread;
@@ -58,7 +51,7 @@ namespace BOT_Platform.Kernel
             if (!Directory.Exists(OtherBots)) Directory.CreateDirectory(OtherBots);
 
             BotConsole.Write("---------------------------------------------------------------------");
-            BotConsole.Write($"BOT_Platfrom v{Assembly.GetExecutingAssembly().GetName().Version.ToString()}");
+            BotConsole.Write($"BOT_Platfrom v{Assembly.GetExecutingAssembly().GetName().Version}");
             BotConsole.Write("---------------------------------------------------------------------");
 
             BotConsole.Write("[Инициализация консоли...]");

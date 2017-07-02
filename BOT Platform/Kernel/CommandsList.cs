@@ -12,28 +12,16 @@ using BOT_Platform.Kernel.Interfaces;
 
 namespace BOT_Platform
 {
-    public struct MyComandStruct
+    public struct MyCommandStruct
     {
         readonly string description;
         readonly CommandsList.Function MyFunction;
-        public string Description
-        {
-            get
-            {
-                return this.description;
-            }
-        }
-        public CommandsList.Function Function
-        {
-            get
-            {
-                return this.MyFunction;
-            }
-        }
+        public string Description => this.description;
+        public CommandsList.Function Function => this.MyFunction;
 
         public bool Hidden { get; }
 
-        public MyComandStruct(string desc, CommandsList.Function func, bool isHidden = false)
+        public MyCommandStruct(string desc, CommandsList.Function func, bool isHidden = false)
         {
             this.Hidden = isHidden;
             this.description = desc;
@@ -51,15 +39,15 @@ namespace BOT_Platform
 
         public delegate void Function(Message message, string args, Bot bot);
 
-        static SortedDictionary<string, MyComandStruct> commandList =
-            new SortedDictionary<string, MyComandStruct>();
+        static SortedDictionary<string, MyCommandStruct> commandList =
+            new SortedDictionary<string, MyCommandStruct>();
 
-        static SortedDictionary<string, MyComandStruct> consoleCommandList =
-            new SortedDictionary<string, MyComandStruct>();
+        static SortedDictionary<string, MyCommandStruct> consoleCommandList =
+            new SortedDictionary<string, MyCommandStruct>();
 
         static Dictionary<string, string> banList = new Dictionary<string, string>();
 
-        internal static void AddConsoleCommand(string command, MyComandStruct mcs)
+        internal static void AddConsoleCommand(string command, MyCommandStruct mcs)
         {
             if (!consoleCommandList.ContainsKey(command))
                 consoleCommandList.Add(command, mcs);
@@ -168,7 +156,7 @@ namespace BOT_Platform
             }
         }
     
-        internal static void TryAddCommand(string command, MyComandStruct mcs)
+        internal static void TryAddCommand(string command, MyCommandStruct mcs)
         {
             if (!commandList.ContainsKey(command))
                 {
@@ -183,12 +171,12 @@ namespace BOT_Platform
         {
             List<string> list = new List<string>();
 
-            SortedDictionary<string, MyComandStruct> temp = isBotCommands == true ? commandList : 
+            SortedDictionary<string, MyCommandStruct> temp = isBotCommands == true ? commandList : 
                                                                               consoleCommandList;
            
                 foreach (string key in temp.Keys)
                 {
-                    MyComandStruct mcs = temp[key];
+                    MyCommandStruct mcs = temp[key];
 
                     if(mcs.Hidden != true)
                     list.Add(key + " - " + mcs.Description);

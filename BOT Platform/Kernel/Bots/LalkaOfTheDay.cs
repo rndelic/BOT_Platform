@@ -15,7 +15,7 @@ using Message = VkNet.Model.Message;
 
 namespace BOT_Platform.Kernel.Bots
 {
-    class LalkaOfTheDay: UserBot
+    sealed class LalkaOfTheDay: UserBot
     {
         public LalkaOfTheDay(string botName, string directory) : base(botName, directory)
         { }

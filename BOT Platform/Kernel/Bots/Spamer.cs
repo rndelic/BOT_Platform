@@ -10,7 +10,7 @@ using VkNet.Model;
 
 namespace BOT_Platform.Kernel.Bots
 {
-    class Spamer : UserBot
+    sealed class Spamer : UserBot
     {
         public Spamer(string botName, string directory) : base(botName, directory)
         {}

@@ -18,7 +18,7 @@ namespace MyFunctions
 
         public void AddMyCommandInPlatform()
         {
-           CommandsList.TryAddCommand("найди", new MyComandStruct("найди(группа, список ключевых слов в постах)", Find));
+           CommandsList.TryAddCommand("найди", new MyCommandStruct("найди(группа, список ключевых слов в постах)", Find));
         }
 
         void Find(Message message, string args, Bot bot)

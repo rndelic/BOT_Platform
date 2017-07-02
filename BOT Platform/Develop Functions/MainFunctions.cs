@@ -19,22 +19,22 @@ namespace MyFunctions
     {
         public void AddMyCommandInPlatform()
         { 
-            CommandsList.TryAddCommand("анонимно", new MyComandStruct(
+            CommandsList.TryAddCommand("анонимно", new MyCommandStruct(
                                        "Пример: анонимно(id получателя или ссылка, текст сообщения)", AnonimSend));
-            CommandsList.TryAddCommand("скажи", new MyComandStruct(
+            CommandsList.TryAddCommand("скажи", new MyCommandStruct(
                                        "Пример: скажи(текст сообщения).", Say));
-            CommandsList.TryAddCommand("команды", new MyComandStruct(
+            CommandsList.TryAddCommand("команды", new MyCommandStruct(
                                        "Показывает список всех команд", ShowCommands));
 
-            CommandsList.TryAddCommand("рандом", new MyComandStruct(
+            CommandsList.TryAddCommand("рандом", new MyCommandStruct(
                                        "Пример: рандом, или рандом(макс знач.), или рандом(мин,макс)", BRandom));
-            CommandsList.TryAddCommand("что", new MyComandStruct(
+            CommandsList.TryAddCommand("что", new MyCommandStruct(
                                        "Пример: что(1 вариант,2вариант,...)", What));
-            CommandsList.TryAddCommand("лайкни", new MyComandStruct(
+            CommandsList.TryAddCommand("лайкни", new MyCommandStruct(
                                        "Пример: лайкни(открытая ссылка на фото или пост)", Like));
-            CommandsList.TryAddCommand("вычисли", new MyComandStruct(
+            CommandsList.TryAddCommand("вычисли", new MyCommandStruct(
                                        "Пример: вычисли(выражение с /,*,+,-) beta = баги", Solve));
-            CommandsList.TryAddCommand("поддержка", new MyComandStruct(
+            CommandsList.TryAddCommand("поддержка", new MyCommandStruct(
                                        "Обратиться к разработчику", Support));
         }
 

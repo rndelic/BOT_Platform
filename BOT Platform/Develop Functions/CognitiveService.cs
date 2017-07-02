@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BOT_Platform;
@@ -30,8 +32,8 @@ namespace MyFunctions
 
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("комбо", new MyComandStruct("Заменяет все лица из первого фото на вторую картинку", Combine));
-            CommandsList.TryAddCommand("эмоция", new MyComandStruct("описание команды", FEmoji, true));
+            CommandsList.TryAddCommand("комбо", new MyCommandStruct("Заменяет все лица из первого фото на вторую картинку", Combine));
+            CommandsList.TryAddCommand("эмоции", new MyCommandStruct("Бот определяет наиболее ярко выраженные эмоции на лицах на фото", FEmoji));
         }
 
         private void FEmoji(Message message, string args, Bot bot)
@@ -40,7 +42,7 @@ namespace MyFunctions
 
             List<Photo> photoList = new List<Photo>();
 
-            Attachment[] photos = message.Attachments.Where(t => t.Instance is Photo).ToArray();
+          Attachment[] photos = message.Attachments.Where(t => t.Instance is Photo).ToArray();
             if (photos.Length != 1)
             {
                 Functions.SendMessage(bot, message, "Нужна одна картинка с лицом(ами).", message.ChatId != null);
@@ -68,9 +70,22 @@ namespace MyFunctions
                 Functions.SendMessage(bot, message, "Лица не найдены :c", message.ChatId != null);
                 return;
             }
+            
+            StringBuilder sB = new StringBuilder(); int index = 1;
+            foreach (var face in resTask.Result)
+            {
+                KeyValuePair<string, float> res = GetMaxEmojiValue(face);
+                sB.AppendLine($"[{index} лицо] {res.Key}: {res.Value}");
+                ++index;
+            }
+            string outFileName = NumerateFaces(loadedBitmap, resTask.Result, bot.Directory);
 
-
-
+            try
+            {
+                photoList.Add(Functions.UploadImageInMessage(outFileName, bot));
+                Upload(message, photoList, bot, sB.ToString());
+            }
+            finally { File.Delete(outFileName); }
         }
 
         public bool NeedCommandInfo(Message message, string args, Bot bot)
@@ -82,6 +97,12 @@ namespace MyFunctions
                     info =
                         $"Справка по команде \"{message.Body}\":\n\n" +
                         "Команда заменяет все лица на первом прикреплённом к сообщению фото на изображение со второй картинки.\n\n" +
+                        "Внимание! Если лица не будут обнаружены, бот не сможет выполнить команду.";
+                    break;
+                case "эмоции":
+                    info =
+                        $"Справка по команде \"{message.Body}\":\n\n" +
+                        "Бот определяет наиболее ярко выраженные эмоции на лицах на фото.\n\n" +
                         "Внимание! Если лица не будут обнаружены, бот не сможет выполнить команду.";
                     break;
             }
@@ -147,19 +168,21 @@ namespace MyFunctions
             }
             string outFileName = CombinePhotos(images, resTask.Result, bot.Directory);
 
-            photoList.Add(Functions.UploadImageInMessage(outFileName, bot));
-            Upload(message, photoList, bot);
-
-            File.Delete(outFileName);
+            try
+            {
+                photoList.Add(Functions.UploadImageInMessage(outFileName, bot));
+                Upload(message, photoList, bot);
+            }
+            finally {File.Delete(outFileName);}
         }
 
-        void Upload(Message message, List<Photo> photoList, Bot bot)
+        void Upload(Message message, List<Photo> photoList, Bot bot, string text = "♻️")
         {
 
             MessagesSendParams param = new MessagesSendParams();
             param.Attachments = new ReadOnlyCollection<Photo>(photoList);
 
-            Functions.SendMessage(bot, message, param, "♻️", message.ChatId != null);
+            Functions.SendMessage(bot, message, param, text, message.ChatId != null);
         }
 
         static byte[] GetImageAsByteArray(Bitmap image)
@@ -232,6 +255,65 @@ namespace MyFunctions
         public CognitiveService()
         {
             AddMyCommandInPlatform();
+        }
+
+        KeyValuePair<string, float> GetMaxEmojiValue(Emoji data)
+        {
+            KeyValuePair<string, float>[] allEmoji =
+            {
+                new KeyValuePair<string, float>("😡 злость (гнев)", data.scores.anger),
+                new KeyValuePair<string, float>("😤 презрение", data.scores.contempt),
+                new KeyValuePair<string, float>("🤢 отвращение", data.scores.disgust),
+                new KeyValuePair<string, float>("😖 страх", data.scores.fear),
+                new KeyValuePair<string, float>("☺️ счастье", data.scores.happiness),
+                new KeyValuePair<string, float>("😐 нейтральность", data.scores.neutral),
+                new KeyValuePair<string, float>("😢 грусть", data.scores.sadness),
+                new KeyValuePair<string, float>("😲 удивление", data.scores.surprise),
+            };
+
+            KeyValuePair<string, float> maxEmoji = new KeyValuePair<string, float>($"❓ эмоция не найдена", 0f);
+            for (int i = 0; i < allEmoji.Length; i++)
+            {
+                if (allEmoji[i].Value > maxEmoji.Value) maxEmoji = allEmoji[i];
+            }
+            return maxEmoji;
+        }
+
+        string NumerateFaces(Bitmap image, List<Emoji> data, string botDirectory)
+        {
+            const string FONT_NAME = "Arial Black";
+
+            Graphics g = Graphics.FromImage(image);
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            FontFamily ff = new FontFamily(FONT_NAME);
+
+            int i = 1;
+            foreach (var emoji in data)
+            {
+                Font font = new Font(ff, Math.Min(emoji.faceRectangle.width / i.ToString().Length, emoji.faceRectangle.height / i.ToString().Length),
+                    FontStyle.Regular);
+                StringFormat sf = new StringFormat();
+
+                GraphicsPath gp = new GraphicsPath();
+                gp.AddString(i.ToString(), ff, (int)FontStyle.Regular,
+                    font.SizeInPoints + 1,
+                    new PointF(emoji.faceRectangle.left, emoji.faceRectangle.top), sf);
+
+                GraphicsPath outlinePath = (GraphicsPath)gp.Clone();
+                outlinePath.Widen(new Pen(Color.Black, font.Size * 0.093f)); //6
+
+                g.FillPath(Brushes.Black, outlinePath);
+                g.FillPath(Brushes.White, gp);
+
+                i++;
+            }
+            string outFilename =
+                Path.Combine(botDirectory, Path.Combine(DIRECTORY_PATH,
+                    String.Format("{0}.png", Guid.NewGuid())));
+            g.Dispose();
+            image.Save(outFilename, ImageFormat.Png);
+
+            return outFilename;
         }
     }
 

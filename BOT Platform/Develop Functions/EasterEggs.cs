@@ -11,12 +11,12 @@ namespace MyFunctions
     {
         public void AddMyCommandInPlatform()
         { 
-            CommandsList.TryAddCommand("мат-мех", new MyComandStruct("Специально для Мат-Меха", MM));
-            CommandsList.TryAddCommand("о себе", new MyComandStruct("Тебе правда интересно?", Biography));
-            CommandsList.TryAddCommand("как сдать", new MyComandStruct("Как сдать матан?", HowTo,true));
-            CommandsList.TryAddCommand("дай на шмот", new MyComandStruct("Для тучи", Tucha, true));
-            CommandsList.TryAddCommand("ты солнышко", new MyComandStruct("", Jane, true));
-            CommandsList.TryAddCommand("компот", new MyComandStruct("", Smuzi, true));
+            CommandsList.TryAddCommand("мат-мех", new MyCommandStruct("Специально для Мат-Меха", MM));
+            CommandsList.TryAddCommand("о себе", new MyCommandStruct("Тебе правда интересно?", Biography));
+            CommandsList.TryAddCommand("как сдать", new MyCommandStruct("Как сдать матан?", HowTo,true));
+            CommandsList.TryAddCommand("дай на шмот", new MyCommandStruct("Для тучи", Tucha, true));
+            CommandsList.TryAddCommand("ты солнышко", new MyCommandStruct("", Jane, true));
+            CommandsList.TryAddCommand("компот", new MyCommandStruct("", Smuzi, true));
         }
 
         private void Smuzi(Message message, string args, Bot bot)

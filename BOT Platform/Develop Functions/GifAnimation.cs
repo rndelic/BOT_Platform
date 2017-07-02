@@ -33,7 +33,7 @@ namespace MyFunctions
 
         public void AddMyCommandInPlatform()
         {
-            CommandsList.TryAddCommand("гиф", new MyComandStruct("Делает гифку из прикреплённых изображений", MakeGif));
+            CommandsList.TryAddCommand("гиф", new MyCommandStruct("Делает гифку из прикреплённых изображений", MakeGif));
         }
 
         private void MakeGif(Message message, string args, Bot bot)
